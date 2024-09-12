@@ -534,7 +534,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 6K4862HUDB;
 				ENABLE_BITCODE = NO;
@@ -551,7 +551,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.courtapp.dev;
 				PRODUCT_NAME = CourtApp;
-				PROVISIONING_PROFILE_SPECIFIER = "CourtAppDistribution_10_09_2024";
+				PROVISIONING_PROFILE_SPECIFIER = CourtAppDistribution_10_09_2024;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = CourtAppDistribution_10_09_2024;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -569,7 +569,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 6K4862HUDB;
 				INFOPLIST_FILE = CourtApp/Info.plist;
@@ -585,7 +585,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.courtapp.dev;
 				PRODUCT_NAME = CourtApp;
-				PROVISIONING_PROFILE_SPECIFIER = "CourtAppDistribution_10_09_2024";
+				PROVISIONING_PROFILE_SPECIFIER = CourtAppDistribution_10_09_2024;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = CourtAppDistribution_10_09_2024;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
