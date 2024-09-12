@@ -32,5 +32,3 @@ coverage/
 jest/
 
 dist/
-
-.env
