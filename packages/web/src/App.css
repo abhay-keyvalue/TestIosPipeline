@@ -1,0 +1,13 @@
+#root {
+  height: 100vh;
+  overflow: hidden;
+  width: 100%;
+  font-family: "Zen Kaku Gothic Antique", sans-serif;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}

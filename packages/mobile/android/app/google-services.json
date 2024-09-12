@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "977138970580",
+    "project_id": "courtappdev",
+    "storage_bucket": "courtappdev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:977138970580:android:157207c40209f18e597041",
+        "android_client_info": {
+          "package_name": "com.google.firebase.quickstart.fcm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACnZU-ARAD_HjnbzTLmNbkhhEPVkwG2xY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:977138970580:android:a7bff6582f963e5b597041",
+        "android_client_info": {
+          "package_name": "org.courtapp.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACnZU-ARAD_HjnbzTLmNbkhhEPVkwG2xY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

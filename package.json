@@ -1,0 +1,41 @@
+{
+  "name": "courtApp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "eslint": "^9.7.0",
+    "eslint-plugin-react": "^7.35.0",
+    "globals": "^15.8.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.7",
+    "prettier": "^3.3.3",
+    "prettier-eslint": "^16.3.0",
+    "typescript": "5.0.4",
+    "typescript-eslint": "^7.16.1"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier --write '**/*.{tsx,ts}'",
+    "prepare": "husky install",
+    "start-metro": "cd packages/mobile && yarn start --reset-cache",
+    "android": "cd packages/mobile && yarn android",
+    "ios": "cd packages/mobile && yarn ios",
+    "build-android": "cd packages/mobile && yarn build-android",
+    "build-shared": "cd packages/shared && yarn build",
+    "web": "cd packages/web && yarn run dev",
+    "pod-install": "cd packages/mobile/ios && pod install"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn lint"
+    }
+  },
+  "packageManager": "yarn@3.6.4"
+}

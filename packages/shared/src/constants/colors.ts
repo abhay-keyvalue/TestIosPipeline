@@ -1,0 +1,53 @@
+const DARK = '#11171C';
+const LIGHT = '#FFFFFF';
+const DARK_1 = '#171C21';
+const LIGHT_1 = '#F3F6F8';
+const TEXT_1 = '#2D2D2D';
+const TEXT_2 = '#8B8B8B';
+const TEXT_3 = '#FFFFFF';
+const TEXT_4 = '#FAFAFA';
+const RED = '#FF0000';
+const GREEN = '#047202';
+const LIGHT_GREY_70 = '#D6D6D6B3';
+const LIGHT_GREY_60 = '#FAFAFA99';
+const PRIMARY_BLUE = '#0069CA';
+
+const common = {
+  RED,
+  GREEN,
+  LIGHT
+};
+
+const light = {
+  ...common,
+  PRIMARY_BACKGROUND: LIGHT_1,
+  SECONDARY_BACKGROUND: LIGHT,
+  PRIMARY_TEXT: TEXT_1,
+  SECONDARY_TEXT: TEXT_2,
+  BORDER_COLOR: LIGHT_GREY_70,
+  PRIMARY_COLOR: PRIMARY_BLUE,
+  CARD_BACKGROUND: LIGHT
+};
+
+const dark = {
+  ...common,
+  PRIMARY_BACKGROUND: DARK,
+  SECONDARY_BACKGROUND: DARK_1,
+  PRIMARY_TEXT: TEXT_3,
+  SECONDARY_TEXT: TEXT_4,
+  BORDER_COLOR: LIGHT_GREY_60,
+  PRIMARY_COLOR: PRIMARY_BLUE,
+  CARD_BACKGROUND: DARK_1
+};
+
+const custom = {
+  ...common,
+  PRIMARY_BACKGROUND: LIGHT_1,
+  SECONDARY_BACKGROUND: GREEN,
+  PRIMARY_TEXT: GREEN,
+  SECONDARY_TEXT: TEXT_2,
+  BORDER_COLOR: LIGHT_GREY_70,
+  PRIMARY_COLOR: RED
+};
+
+export const colors = {light, dark, custom};

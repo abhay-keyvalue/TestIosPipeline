@@ -1,0 +1,99 @@
+name: "Build Android app"
+
+on:
+  workflow_dispatch:
+    branches: [feat-mobile/android-pipeline]
+
+
+permissions:
+      id-token: write 
+      contents: read 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: adopt
+          cache: gradle
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup Node  
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Run Yarn Install
+        run: |
+             npm i -g corepack
+             yarn install
+
+      # Setup Caching for our Gradle Builds (I have trimmed 5 minutes off of my 12 minutes builds by using this)
+      - name: Cache Gradle Wrapper
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+
+      # More Gradle Caching
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-caches-
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-action
+          aws-region: eu-central-1
+
+      - name: Fetch env from Secret Manager
+        id: fetch-env
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secret-ids: |
+            ENV_VALUES, ${{ vars.SECRET_NAME }}
+
+      - name: Create .env file
+        run: |
+          echo "$ENV_VALUES" > packages/mobile/.env
+      
+      - name: Build shared folder
+        run: |
+             yarn build-shared
+
+      - name: Run Yarn Install
+        run: |
+             yarn install
+
+      - name: Build application
+        run: |
+             cd packages/mobile/android
+             ./gradlew assembleRelease
+
+      - name: Upload application
+        uses: actions/upload-artifact@v2
+        with:
+          name: app
+          path: packages/mobile/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 3
+
+      - name: Upload artifact to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          groups: kv-testers
+          file: packages/mobile/android/app/build/outputs/apk/release/app-release.apk
