@@ -48,24 +48,6 @@ jobs:
           security find-identity -v -p codesigning
           ls -l ~/Library/MobileDevice/Provisioning\ Profiles
 
-      - name: Increment Build Number
-        run: |
-          # Get the current CFBundleVersion
-          CURRENT_VERSION=$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' packages/mobile/ios/CourtApp/Info.plist)
-          echo $CURRENT_VERSION
-          # Check if CURRENT_VERSION is numeric and increment
-          if [[ $CURRENT_VERSION =~ ^[0-9]+$ ]]; then
-            NEXT_VERSION=$(($CURRENT_VERSION + 1))
-          else
-            echo "Current version is not a number, setting to 1"
-            NEXT_VERSION=1
-          fi
-
-          # Update the CFBundleVersion with the incremented value
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEXT_VERSION" packages/mobile/ios/CourtApp/Info.plist
-
-          # Print the new version
-          echo "Updated CFBundleVersion to $NEXT_VERSION"
 
       - uses: actions/setup-node@v3
         with:
