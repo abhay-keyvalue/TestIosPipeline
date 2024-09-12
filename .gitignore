@@ -1,0 +1,36 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+
+# Logs
+logs/
+*.log
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.yarn/cache
+.yarn/install-state.gz
+
+# Dependency directories
+packages/*/node_modules
+
+# Web
+packages/web/build/
+packages/web/.next/
+packages/web/out/
+
+# TypeScript
+*.tsbuildinfo
+
+# Tests
+coverage/
+jest/
+
+dist/
+
+.env
