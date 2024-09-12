@@ -133,10 +133,10 @@ jobs:
           path: ${{ runner.temp }}/build/CourtApp.ipa
           retention-days: 3
 
-- name: 'Upload app to TestFlight'
-  uses: apple-actions/upload-testflight-build@v1
-  with: 
-    app-path: ${{ runner.temp }}/build/CourtApp.ipa 
-    issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
-    api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
-    api-private-key: ${{ vars.APPSTORE_API_PRIVATE_KEY }}
+      - name: 'Upload app to TestFlight'
+        uses: apple-actions/upload-testflight-build@v1
+        with: 
+          app-path: ${{ runner.temp }}/build/CourtApp.ipa 
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ vars.APPSTORE_API_PRIVATE_KEY }}
