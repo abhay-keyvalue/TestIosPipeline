@@ -48,6 +48,29 @@ jobs:
           security find-identity -v -p codesigning
           ls -l ~/Library/MobileDevice/Provisioning\ Profiles
 
+      - name: Fetch Latest Build Number
+        id: fetch_build_number
+        run: |
+          # Install jq for parsing JSON
+          brew install jq
+
+          # Get the latest build number
+          response=$(curl -s -H "Authorization: Bearer ${{ vars.APPSTORE_API_PRIVATE_KEY }}" \
+            "https://api.appstoreconnect.apple.com/v1/builds?filter[version]=1.0" | jq '.data[0].attributes.version')
+
+          # Extract build number
+          latest_build_number=$(echo "$response" | jq -r '.buildNumber')
+
+          # Increment the build number
+          new_build_number=$((latest_build_number + 1))
+
+          # Output the new build number
+          echo "NEW_BUILD_NUMBER=${new_build_number}" >> $GITHUB_ENV
+
+      - name: Update Build Number
+        run: |
+          # Update the build number in the Xcode project
+          agvtool new-version -all ${{ env.NEW_BUILD_NUMBER }}
 
       - uses: actions/setup-node@v3
         with:
