@@ -37,14 +37,12 @@ jobs:
              npm i -g corepack
              yarn install
 
-      # Setup Caching for our Gradle Builds (I have trimmed 5 minutes off of my 12 minutes builds by using this)
       - name: Cache Gradle Wrapper
         uses: actions/cache@v2
         with:
           path: ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
-      # More Gradle Caching
       - name: Cache Gradle Dependencies
         uses: actions/cache@v2
         with:
@@ -52,23 +50,6 @@ jobs:
           key: ${{ runner.os }}-gradle-caches-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-caches-
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-action
-          aws-region: eu-central-1
-
-      - name: Fetch env from Secret Manager
-        id: fetch-env
-        uses: aws-actions/aws-secretsmanager-get-secrets@v1
-        with:
-          secret-ids: |
-            ENV_VALUES, ${{ vars.SECRET_NAME }}
-
-      - name: Create .env file
-        run: |
-          echo "$ENV_VALUES" > packages/mobile/.env
       
       - name: Build shared folder
         run: |
@@ -90,10 +71,13 @@ jobs:
           path: packages/mobile/android/app/build/outputs/apk/release/app-release.apk
           retention-days: 3
 
-      - name: Upload artifact to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
+      # New Step: Upload APK to Google Play Console Internal Testing
+      - name: Upload APK to Google Play Console Internal Testing
+        uses: r0adkll/upload-google-play@v1
         with:
-          appId: ${{ secrets.FIREBASE_APP_ID }}
-          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-          groups: kv-testers
-          file: packages/mobile/android/app/build/outputs/apk/release/app-release.apk
+          serviceAccountJson: ${{ vars.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY }}
+          packageName: org.courtapp.dev
+          releaseFiles: packages/mobile/android/app/build/outputs/apk/release/app-release.apk
+          track: internal
+          inAppUpdatePriority: 3  # Optional: Set in-app update priority
+          status: draft           # Optional: You can set status to draft, inProgress, or completed
