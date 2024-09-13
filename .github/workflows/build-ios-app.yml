@@ -13,7 +13,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install the Apple certificate and provisioning profile
         env:
@@ -48,9 +48,9 @@ jobs:
           security find-identity -v -p codesigning
           ls -l ~/Library/MobileDevice/Provisioning\ Profiles
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'yarn'
 
       - name: Enable Corepack
@@ -58,7 +58,7 @@ jobs:
 
       # Cache Yarn dependencies
       - name: Cache Yarn dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             **/node_modules
@@ -81,7 +81,7 @@ jobs:
 
       # Cache Cocoapods
       - name: Cache Cocoapods
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             packages/mobile/ios/Pods
@@ -96,7 +96,7 @@ jobs:
 
       # Cache Build Archive
       - name: Cache Build Archive
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData
@@ -128,16 +128,19 @@ jobs:
           -exportPath $RUNNER_TEMP/build                    
 
       - name: Upload application
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app
           path: ${{ runner.temp }}/build/CourtApp.ipa
           retention-days: 3
 
-      - name: 'Upload app to TestFlight'
-        uses: apple-actions/upload-testflight-build@v1
-        with: 
-          app-path: ${{ runner.temp }}/build/CourtApp.ipa 
+      - name: Authenticate with App Store Connect
+        uses: apple-actions/app-store-connect-api-key@v1
+        with:
           issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ vars.APPSTORE_API_PRIVATE_KEY }}
+          key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          private-key: ${{ vars.APPSTORE_API_PRIVATE_KEY }}
+
+      - name: Upload to TestFlight
+        run: |
+          xcrun altool --upload-app --type ios --file $RUNNER_TEMP/build/CourtApp.ipa --apiKey $APP_STORE_CONNECT_API_KEY_ID --apiIssuer $APP_STORE_CONNECT_ISSUER_ID --verbose
