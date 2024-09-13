@@ -75,9 +75,11 @@ jobs:
       - name: Upload APK to Google Play Console Internal Testing
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJson: ${{ vars.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY }}
+          serviceAccountJsonPlainText: ${{ vars.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY }}
           packageName: org.courtapp.dev
           releaseFiles: packages/mobile/android/app/build/outputs/apk/release/app-release.apk
           track: internal
           inAppUpdatePriority: 3  # Optional: Set in-app update priority
           status: draft           # Optional: You can set status to draft, inProgress, or completed
+        env:
+          DEBUG: '*'
