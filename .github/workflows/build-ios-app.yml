@@ -134,16 +134,10 @@ jobs:
           path: ${{ runner.temp }}/build/CourtApp.ipa
           retention-days: 3
 
-      - name: Upload to TestFlight
-        env:
-          APPSTORE_CONNECT_API_KEY_ID: ${{ vars.APPSTORE_API_KEY_ID }}
-          APPSTORE_CONNECT_ISSUER_ID: ${{ vars.APPSTORE_ISSUER_ID }}
-          APPSTORE_CONNECT_PRIVATE_KEY: ${{ vars.APPSTORE_API_PRIVATE_KEY }}
-        run: |
-          # Authenticate with App Store Connect
-          auth_token=$(curl -s -X POST https://api.appstoreconnect.apple.com/v1/auth/token \
-            --header "Authorization: Bearer $APPSTORE_CONNECT_PRIVATE_KEY" \
-            --header "Content-Type: application/json" | jq -r '.data.id')
-
-          # Upload to TestFlight using xcrun altool
-          xcrun altool --upload-app --type ios --file $RUNNER_TEMP/build/CourtApp.ipa --apiKey "$APPSTORE_CONNECT_API_KEY_ID" --apiIssuer "$APPSTORE_CONNECT_ISSUER_ID" --verbose
+      - name: 'Upload app to TestFlight'
+          uses: Apple-Actions/upload-testflight-build@master
+          with:
+            app-path: ${{ runner.temp }}/build/CourtApp.ipa 
+            issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+            api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+            api-private-key: ${{ vars.APPSTORE_API_PRIVATE_KEY }}
