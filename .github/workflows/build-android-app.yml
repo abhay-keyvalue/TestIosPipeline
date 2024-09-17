@@ -72,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app
-          path: packages/mobile/android/app/build/outputs/bundle/release/app-release.abb
+          path: packages/mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 3
 
       # New Step: Upload APK to Google Play Console Internal Testing
@@ -81,7 +81,7 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ vars.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY }}
           packageName: org.courtapp.dev
-          releaseFiles: packages/mobile/android/app/build/outputs/bundle/release/app-release.abb
+          releaseFiles: packages/mobile/android/app/build/outputs/bundle/release/app-release.aab
           track: internal
           inAppUpdatePriority: 3  # Optional: Set in-app update priority
           status: draft           # Optional: You can set status to draft, inProgress, or completed
