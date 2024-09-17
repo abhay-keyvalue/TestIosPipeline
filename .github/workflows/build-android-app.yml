@@ -59,12 +59,12 @@ jobs:
         run: |
              yarn install
 
-    - name: Build with Gradle
-      env:
-        KEYSTORE_PASSWORD: ${{ vars.KEYSTORE_PASSWORD }}
-        KEY_ALIAS: ${{ vars.KEY_ALIAS }}
-        KEY_PASSWORD: ${{ vars.KEY_PASSWORD }}
-      run: |
+      - name: Build with Gradle
+        env:
+          KEYSTORE_PASSWORD: ${{ vars.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ vars.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ vars.KEY_PASSWORD }}
+        run: |
              cd packages/mobile/android
              ./gradlew bundleRelease
 
