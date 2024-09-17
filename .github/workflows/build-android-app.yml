@@ -2,7 +2,7 @@ name: "Build Android app"
 
 on:
   workflow_dispatch:
-    branches: [feat-mobile/android-pipeline]
+    branches: [main]
 
 
 permissions:
