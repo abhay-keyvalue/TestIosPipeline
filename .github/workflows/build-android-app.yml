@@ -59,10 +59,14 @@ jobs:
         run: |
              yarn install
 
-      - name: Build application
-        run: |
+    - name: Build with Gradle
+      env:
+        KEYSTORE_PASSWORD: ${{ vars.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ vars.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ vars.KEY_PASSWORD }}
+      run: |
              cd packages/mobile/android
-             ./gradlew assembleRelease
+             ./gradlew bundleRelease
 
       - name: Upload application
         uses: actions/upload-artifact@v4
