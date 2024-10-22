@@ -55,6 +55,9 @@ const CustomHeader = ({
     },
     badgeCount: {
       color: colors?.PRIMARY_BACKGROUND
+    },
+    border: {
+      backgroundColor: colors?.BORDER_COLOR
     }
   };
 
@@ -76,7 +79,15 @@ const CustomHeader = ({
   }, [showLanguageSelector, showCloseButton]);
 
   const renderAvatar = useMemo(() => {
-    return profileData?.avatar?.length > 0 && <CustomImage source={{uri: profileData?.avatar}} />;
+    return (
+      <CustomImage
+        source={
+          profileData?.avatar?.length > 0
+            ? {uri: profileData?.avatar}
+            : require('../../assets/png/defaultOfficerAvatar.png')
+        }
+      />
+    );
   }, [profileData?.avatar]);
 
   const renderLeftContainer = () => {
@@ -88,7 +99,11 @@ const CustomHeader = ({
           </TouchableOpacity>
         )}
         {showAvatar && (
-          <TouchableOpacity style={styles.avatarIcon} hitSlop={hitSlop} onPress={goToProfile}>
+          <TouchableOpacity
+            style={[styles.avatarIcon, themeStyle.border]}
+            hitSlop={hitSlop}
+            onPress={goToProfile}
+          >
             {renderAvatar}
           </TouchableOpacity>
         )}

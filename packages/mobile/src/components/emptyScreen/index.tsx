@@ -1,4 +1,5 @@
 import React from 'react';
+import type {RegisteredStyle} from 'react-native';
 import {View} from 'react-native';
 import {useSelector} from 'react-redux';
 import {ScaledSheet} from 'react-native-size-matters';
@@ -11,9 +12,10 @@ type EmptyScreenProps = {
   icon?: React.ReactNode;
   title?: string;
   description: string;
+  containerStyle?: RegisteredStyle<{[key: string]: string | number}>;
 };
 
-const EmptyScreen = ({icon, title, description}: EmptyScreenProps) => {
+const EmptyScreen = ({icon, title, description, containerStyle}: EmptyScreenProps) => {
   const {colors} = useSelector((state: RootState) => state.theme);
 
   const themeStyle = {
@@ -23,7 +25,7 @@ const EmptyScreen = ({icon, title, description}: EmptyScreenProps) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       {icon && <View style={styles.iconContainer}>{icon}</View>}
       {title && <CustomText style={[styles.title, themeStyle.text]}>{title}</CustomText>}
       {description && (
@@ -52,13 +54,15 @@ const styles = ScaledSheet.create({
     marginTop: '8@s',
     textAlign: 'center',
     fontWeight: '300',
-    marginBottom: WINDOW_HEIGHT * 0.1
+    marginBottom: WINDOW_HEIGHT * 0.1,
+    opacity: 0.5
   },
   iconContainer: {
     width: '80@s',
     height: '80@s',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginBottom: '20@s'
   }
 });
 

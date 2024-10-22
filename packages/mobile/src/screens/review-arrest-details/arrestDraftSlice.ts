@@ -2,69 +2,81 @@ import type {PayloadAction} from '@reduxjs/toolkit';
 import {createSlice} from '@reduxjs/toolkit';
 
 export interface ArrestDraftType {
-  caseNumber?: string;
-  stage?: string;
   createdAt?: string;
+  locationData?: {
+    locRoad?: string;
+    locSuburb?: string;
+    locCity?: string;
+    locCounty?: string;
+    locStateDistrict?: string;
+    locState?: string;
+    locPostcode?: string;
+  };
+  caseNumber?: string;
+  isIdRefused?: boolean;
   locationName?: string;
   criminalOffence?: string;
-  offences?: Array<{
-    article?: string;
-    description?: string;
-  }>;
   circumstance?: string;
   detaineeDeclaration?: string;
   additionalInfo?: string;
-  documents?: Array<{
+  name?: string;
+  gender?: string | null;
+  dob?: string;
+  fatherName?: string | null;
+  avatar?: string | null;
+  avatarThumbnail?: string | null;
+  placeOfBirth?: string | null;
+  nationality?: string | null;
+  citizenship?: string | null;
+  education?: string | null;
+  profession?: string | null;
+  maritalStatus?: string | null;
+  isConvicted?: boolean | null;
+  phoneNumber?: string | null;
+  district?: string | null;
+  city?: string | null;
+  neighborhood?: string | null;
+  street?: string | null;
+  palaceNumber?: string | null;
+  staircaseNumber?: string | null;
+  defenceAssignment?: string | null;
+  offences?: Array<{
     id?: string;
-    documentType?: string;
+    article?: string;
+    description?: string;
+  }>;
+  userImage?: {
+    mediaLocalUrl?: string;
+    mediaType?: string;
+    mediaKey?: string;
+    mediaName?: string;
+  };
+  circumstanceRecording?: {
+    mediaLocalUrl?: string;
+    mediaType?: string;
+    mediaKey?: string;
+    mediaName?: string;
     documentKey?: string;
-    documentNumber?: string;
-    documentName?: string;
+  };
+  documents?: Array<{
+    mediaLocalUrl?: string;
+    mediaType?: string;
+    mediaKey?: string;
+    mediaName?: string;
   }>;
   proofDocument?: {
-    id?: string;
+    documentLocalUrl?: string;
     documentType?: string;
     documentKey?: string;
-    documentNumber?: string;
     documentName?: string;
-  };
-  suspect?: {
-    name?: string;
-    gender?: string | null;
-    dob?: string;
-    fatherName?: string | null;
-    avatar?: string | null;
-    avatarThumbnail?: string | null;
-    placeOfBirth?: string | null;
-    nationality?: string | null;
-    citizenship?: string | null;
-    education?: string | null;
-    profession?: string | null;
-    maritalStatus?: string | null;
-    isConvicted?: boolean | null;
-    phoneNumber?: string | null;
-    proofDocument?: {
-      id?: string;
-      documentNumber?: string;
-      documentType?: string;
-      documentKey?: string;
-      documentName?: string | null;
-    };
-    address?: {
-      district?: string | null;
-      city?: string | null;
-      neighborhood?: string | null;
-      street?: string | null;
-      palaceNumber?: string | null;
-      staircaseNumber?: string | null;
-    };
   };
   prosecutorDetails?: {
     name?: string;
   };
-  defenseDetails?: {
+  defenceLawyer?: {
     name?: string;
     phoneNumber?: string;
+    email?: string;
   };
   officerDetails?: {
     id?: string;
@@ -88,7 +100,7 @@ export const arrestDraftSlice = createSlice({
   initialState,
   reducers: {
     setArrestDraft: (state, action: PayloadAction<ArrestDraftType>) => {
-      state.arrestDraft = action.payload;
+      state.arrestDraft = {...state.arrestDraft, ...action.payload};
     },
     resetArrestDraft: () => initialState
   }

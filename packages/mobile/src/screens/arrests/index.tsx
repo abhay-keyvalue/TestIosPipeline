@@ -9,7 +9,7 @@ import type {RootState} from '@src/store';
 import {routes} from '@constants/labels';
 import {apiMethods, endPoints} from 'shared';
 import {navigateTo} from '@navigation/navigationUtils';
-import {arrestStages, arrestStagesLabels} from '@constants/general';
+import {arrestStagesLabels} from '@constants/general';
 import {setSelectedFilterData} from '@screens/filter-screen/filterSlice';
 import {setArrestDraft} from '@screens/review-arrest-details/arrestDraftSlice';
 import SortSheet from '@components/sortSheet';
@@ -87,23 +87,25 @@ function Arrests(): React.JSX.Element {
     }
   };
 
-  const navigateToMandatoryInformation = (id) => {
-    navigateTo(routes.MANDATORY_INFORMATION, {arrestId: id});
-  };
+  // const navigateToMandatoryInformation = (id) => {
+  //   navigateTo(routes.MANDATORY_INFORMATION, {arrestId: id});
+  // };
 
   const navigateArrestDetails = (id) => {
     navigateTo(routes.ARREST_DETAILS, {arrestId: id});
   };
 
   const onPressArrestCard = (item) => {
-    switch (item.stage) {
-      case arrestStages.DRAFT:
-        navigateToMandatoryInformation(item.id);
-        break;
+    navigateArrestDetails(item.id);
 
-      default:
-        navigateArrestDetails(item.id);
-    }
+    // switch (item.stage) {
+    //   case arrestStages.DRAFT:
+    //     navigateToMandatoryInformation(item.id);
+    //     break;
+
+    //   default:
+    //     navigateArrestDetails(item.id);
+    // }
   };
 
   const onRefresh = () => {

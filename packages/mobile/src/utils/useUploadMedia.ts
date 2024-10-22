@@ -13,11 +13,11 @@ const useUploadMedia = () => {
 
   const uploadMedia = async ({mediaName, mediaUrl, mediaType}) => {
     setLoading(true);
-    const imageUploadOptions = {
+    const mediaUploadOptions = {
       key: mediaName,
       mediaType
     };
-    const mediaUploadData = await getMediaPreSignedUrl(imageUploadOptions);
+    const mediaUploadData = await getMediaPreSignedUrl(mediaUploadOptions);
 
     const isSuccess = await uploadToS3({
       signedUrl: mediaUploadData?.url,
@@ -31,9 +31,9 @@ const useUploadMedia = () => {
 
   const uploadToS3 = async ({signedUrl, file}) => {
     try {
-      const imageBody = await convertToBase64(file);
+      const mediaBody = await convertToBase64(file);
 
-      const data = Buffer.from(imageBody, 'base64');
+      const data = Buffer.from(mediaBody, 'base64');
 
       if (data) {
         const response = await axios.put(signedUrl, data);
@@ -47,7 +47,7 @@ const useUploadMedia = () => {
 
   const convertToBase64 = async (filePath) => {
     let base64Data = '';
-    let imagePath = isIOS ? filePath.replace('file:///', '') : filePath;
+    let mediaPath = isIOS ? filePath.replace('file:///', '') : filePath;
 
     if (filePath.includes(S3_URL_DOMAIN_SUBSTRING))
       await RNFetchBlob.config({
@@ -55,14 +55,14 @@ const useUploadMedia = () => {
       })
         .fetch('GET', filePath)
         .then((resp) => {
-          imagePath = isIOS ? resp.path() : `file://${resp.path()}`;
+          mediaPath = isIOS ? resp.path() : `file://${resp.path()}`;
         })
         .catch(() => {
           showToast(t('failed_to_upload_file'), {type: 'error'});
         });
 
     await RNFetchBlob.fs
-      .readFile(imagePath, 'base64')
+      .readFile(mediaPath, 'base64')
       .then((data) => {
         base64Data = data;
       })

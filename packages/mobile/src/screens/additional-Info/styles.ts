@@ -44,35 +44,65 @@ const styles = ScaledSheet.create({
     alignItems: 'center'
   },
   cameraContainer: {
-    minHeight: '70@vs'
+    minHeight: '80@vs'
   },
   photoContainer: {
     width: '100%',
     height: '100%',
-    marginTop: '12@vs'
+    marginTop: '14@vs'
   },
   photo: {
-    width: '120@s',
-    height: '90@s',
+    width: '70@s',
+    height: '70@s',
     marginRight: '10@s',
-    overflow: 'hidden',
-    borderRadius: '10@s'
+    borderRadius: '6@s'
   },
   photoImage: {
     width: '100%',
-    height: '100%'
+    height: '100%',
+    borderRadius: '6@s',
+    overflow: 'hidden'
   },
   removeIcon: {
     position: 'absolute',
-    top: '0@vs',
-    right: '0@s',
-    left: '0@s',
-    bottom: '0@vs',
-    backgroundColor: 'rgba(255,255,255,0.5)',
-    padding: '3@s',
-    zIndex: 2,
-    justifyContent: 'center',
+    top: -12,
+    right: -12,
+    zIndex: 2
+  },
+  previewContainer: {
+    padding: '8@s',
+    borderRadius: '8@s',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%'
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    borderRadius: '8@s'
+  },
+  previewImageContainer: {
+    width: '70@s',
+    height: '70@s',
+    borderRadius: '8@s'
+  },
+  reTakeButton: {
+    marginRight: '10@vs',
+    flexDirection: 'row',
     alignItems: 'center'
+  },
+  reTakeText: {
+    fontSize: '14@ms0.3',
+    fontWeight: '500',
+    marginLeft: '5@s'
+  },
+  closeButton: {
+    position: 'absolute',
+    top: -12,
+    right: -12,
+    zIndex: 2
   }
 });
 

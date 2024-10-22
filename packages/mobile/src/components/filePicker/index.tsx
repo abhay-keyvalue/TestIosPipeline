@@ -72,7 +72,7 @@ function FilePicker({buttonStyle, onPickImages}: FilePickerType): React.JSX.Elem
 const styles = ScaledSheet.create({
   container: {
     borderRadius: '8@s',
-    minHeight: '70@vs',
+    minHeight: '80@vs',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: '5@vs',

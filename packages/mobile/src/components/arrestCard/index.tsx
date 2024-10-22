@@ -15,7 +15,7 @@ import CourtHammer from '@assets/svg/courtHammer.svg';
 import Tick from '@assets/svg/tick.svg';
 import Cross from '@assets/svg/cross.svg';
 import Shield from '@assets/svg/shield.svg';
-import RightArrow from '@assets/svg/rightArrow.svg';
+// import RightArrow from '@assets/svg/rightArrow.svg';
 
 type ArrestCardProps = {
   onPress?: () => void;
@@ -131,16 +131,16 @@ const ArrestCard = ({onPress = () => {}, arrestData = {}}: ArrestCardProps) => {
     }
   }, [stageChangeTime]);
 
-  const renderCompleteArrestLabel = () => {
-    return (
-      <View style={[styles.completeLabelRow, themeStyle.redBackground]}>
-        <CustomText style={[styles.subTitle, themeStyle.redText]}>
-          {t('complete_arrest_details')}
-        </CustomText>
-        <RightArrow color={colors.RED} />
-      </View>
-    );
-  };
+  // const renderCompleteArrestLabel = () => {
+  //   return (
+  //     <View style={[styles.completeLabelRow, themeStyle.redBackground]}>
+  //       <CustomText style={[styles.subTitle, themeStyle.redText]}>
+  //         {t('complete_arrest_details')}
+  //       </CustomText>
+  //       <RightArrow color={colors.RED} />
+  //     </View>
+  //   );
+  // };
 
   const renderRightView = () => {
     return (
@@ -174,7 +174,7 @@ const ArrestCard = ({onPress = () => {}, arrestData = {}}: ArrestCardProps) => {
         {renderLeftView()}
         {renderRightView()}
       </View>
-      {stage === arrestStages.DRAFT && renderCompleteArrestLabel()}
+      {/* {stage === arrestStages.DRAFT && renderCompleteArrestLabel()} */}
     </TouchableOpacity>
   );
 };

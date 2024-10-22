@@ -1,24 +1,17 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, BackHandler} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {useTranslation} from 'react-i18next';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {useFocusEffect} from '@react-navigation/native';
-import dateFormat from 'dateformat';
 
 import type {RootState} from '@src/store';
-import {goBack, navigateAndPush, navigateTo} from '@navigation/navigationUtils';
-import {defenceAssignmentList} from '@constants/general';
+import {goBack, navigateTo} from '@navigation/navigationUtils';
 import {routes} from '@constants/labels';
 import {apiMethods, endPoints} from 'shared';
 import {showToast} from '@components/customToast';
-import {setArrestDraft} from './arrestDraftSlice';
 import useApi from '@api/useApi';
 import CustomLoader from '@components/customLoader';
-import SuspectInfoCard from '@components/suspectInfoCard';
-import ResidentialDetailsCard from '@components/residentialDetailsCard';
-import OffenseDetailsCard from '@components/offenseDetailsCard';
-import AdditionalInfoCard from '@components/additionalInfoCard';
+import ArrestInformationCard from '@components/arrestInformationCard';
 import CustomHeader from '@components/customHeader';
 import CustomPopup from '@components/customPopup';
 import CustomButton from '@components/customButton';
@@ -31,30 +24,8 @@ function ReviewArrestDetails(params): React.JSX.Element {
   const {arrestDraft} = useSelector((state: RootState) => state.arrestDraft);
   const {t} = useTranslation();
   const {callApi, loading} = useApi();
-  const getArrestApi = useApi();
-  const dispatch = useDispatch();
 
   const routeParams = params?.route?.params;
-
-  const {
-    suspect,
-    caseNumber,
-    createdAt,
-    locationName,
-    criminalOffence,
-    offences,
-    circumstance,
-    additionalInfo,
-    defenseDetails
-  } = arrestDraft;
-
-  const {name, avatarThumbnail, dob, gender, phoneNumber, proofDocument, address} = suspect || {};
-
-  const {district, city, neighborhood, street, staircaseNumber, palaceNumber} = address || {};
-
-  const detaineeDeclaration = defenceAssignmentList.find(
-    (item) => item.value === arrestDraft?.detaineeDeclaration
-  );
 
   const [showClosePopup, setShowClosePopup] = useState(false);
   const [arrestId, setArrestId] = useState(null);
@@ -78,12 +49,6 @@ function ReviewArrestDetails(params): React.JSX.Element {
     if (routeParams?.arrestId?.length > 0) setArrestId(routeParams?.arrestId);
   }, [routeParams]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (arrestId) getArrestDetails();
-    }, [arrestId])
-  );
-
   const handleBackButton = () => {
     goBack();
 
@@ -96,50 +61,104 @@ function ReviewArrestDetails(params): React.JSX.Element {
   };
 
   const getSubmitArrestData = () => {
+    const {
+      name,
+      dob,
+      gender,
+      proofDocument = {},
+      locationName,
+      circumstance,
+      criminalOffence,
+      documents = [],
+      circumstanceRecording = {},
+      userImage = {},
+      isIdRefused,
+      defenceLawyer,
+      defenceAssignment,
+      locationData
+    } = arrestDraft;
+
+    const {locCity, locCounty, locStateDistrict, locState, locPostcode, locRoad, locSuburb} =
+      locationData || {};
+
+    const arrestDocuments = [
+      ...documents.map(({mediaType, mediaKey, mediaName}) => ({
+        mediaType,
+        mediaKey,
+        mediaName
+      })),
+      ...(circumstanceRecording.mediaKey
+        ? [
+          {
+            mediaType: circumstanceRecording.mediaType,
+            mediaKey: circumstanceRecording.mediaKey,
+            mediaName: circumstanceRecording.mediaName
+          }
+        ]
+        : [])
+    ];
+
+    let updatedProofDocument = null;
+
+    if (arrestDraft?.proofDocument?.documentKey && !isIdRefused)
+      updatedProofDocument = {
+        documentKey: proofDocument?.documentKey,
+        documentType: proofDocument?.documentType,
+        documentName: proofDocument?.documentName
+      };
+
     return {
-      arrestId
+      suspect: {
+        name,
+        dob,
+        gender,
+        avatar: userImage.mediaKey
+      },
+      proofDocument: updatedProofDocument,
+      arrestData: {
+        offenceDetails: criminalOffence,
+        locationName,
+        locRoad,
+        locSuburb,
+        locCity,
+        locCounty,
+        locStateDistrict,
+        locState,
+        locPostcode,
+        circumstance,
+        arrestDocuments,
+        isIdRefused,
+        defenceAssignment,
+        defenceLawyer: {
+          defenceLawyerName: defenceLawyer?.name,
+          defenceLawyerContact: defenceLawyer?.phoneNumber,
+          defenceLawyerEmail: defenceLawyer?.email
+        }
+      }
     };
-  };
-
-  const getArrestDetails = async () => {
-    const options = {
-      method: apiMethods.get,
-      endpoint: `${endPoints.arrests}/${arrestId}`
-    };
-
-    try {
-      const response = await getArrestApi.callApi(options);
-
-      if (response?.data?.statusCode === 200) dispatch(setArrestDraft(response?.data?.data));
-    } catch (error) {
-      showToast(t('failed_to_save_data'), {type: 'error'});
-    }
   };
 
   const onSubmit = async () => {
+    const data = getSubmitArrestData();
     const options = {
-      method: apiMethods.put,
-      endpoint: endPoints.submitArrest,
-      data: getSubmitArrestData()
+      method: apiMethods.post,
+      endpoint: endPoints.draft,
+      data
     };
 
     const response = await callApi(options);
 
-    if (response?.data?.statusCode === 200) setShowSuccessPopup(true);
-    else showToast(t('failed_to_save_data'), {type: 'error'});
-  };
-
-  const editResidentialDetails = () => {
-    navigateAndPush(routes.RESIDENTIAL_DETAILS, {arrestId, isEditAndSubmit: true});
-  };
-
-  const editAdditionalInfo = () => {
-    navigateAndPush(routes.ADDITIONAL_INFO, {arrestId, isEditAndSubmit: true});
+    if (response?.data?.statusCode === 200) {
+      setShowSuccessPopup(true);
+      setArrestId(response?.data?.data?.id);
+    } else {
+      showToast(t('failed_to_save_data'), {type: 'error'});
+    }
   };
 
   const onSuccessPopupClick = () => {
     setShowSuccessPopup(false);
-    navigateTo(routes.ARREST_DETAILS, {arrestId});
+    navigateTo(routes.ARREST_DETAILS_V2, {arrestId, fromReview: true});
   };
 
   const renderFooter = () => {
@@ -159,11 +178,12 @@ function ReviewArrestDetails(params): React.JSX.Element {
     return (
       <>
         <CustomPopup
-          title={t('save_your_progress')}
+          title={t('discard_your_progress')}
           description={t('you_havent_completed')}
           buttonProps={{
-            primaryButtonTitle: t('save_for_later'),
+            primaryButtonTitle: t('close'),
             secondaryButtonTitle: t('discard'),
+            primaryButtonAction: () => setShowClosePopup(false),
             secondaryButtonAction: onPressDiscard
           }}
           icon={<CircleWarning />}
@@ -172,11 +192,11 @@ function ReviewArrestDetails(params): React.JSX.Element {
         />
         <CustomPopup
           title={t('arrest_submitted')}
-          description={`${t('Court_hearing_by')} ${dateFormat(new Date().getTime(), 'MM:hh, dd/mm/yyyy')}`}
           buttonProps={{primaryButtonTitle: t('ok'), primaryButtonAction: onSuccessPopupClick}}
           icon={<CircleTick />}
           visible={showSuccessPopup}
           setVisible={setShowSuccessPopup}
+          onClose={onSuccessPopupClick}
         />
       </>
     );
@@ -194,41 +214,7 @@ function ReviewArrestDetails(params): React.JSX.Element {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        <SuspectInfoCard
-          arrestId={arrestId}
-          name={name}
-          imageUrl={avatarThumbnail}
-          documentUrl={proofDocument?.documentKey}
-          criminalCode={caseNumber}
-          arrestTime={createdAt}
-          arrestLocation={locationName}
-          gender={gender}
-          dob={dob}
-          idFileName={proofDocument?.documentName}
-        />
-        <ResidentialDetailsCard
-          onPressEdit={editResidentialDetails}
-          district={district}
-          city={city}
-          neighborhood={neighborhood}
-          street={street}
-          staircase_number={staircaseNumber}
-          telephone_number={phoneNumber}
-          private_house_palace_number={palaceNumber}
-        />
-        <OffenseDetailsCard
-          arrestId={arrestId}
-          criminalOffense={criminalOffence}
-          articleOfCriminalCodes={offences}
-          circumstances={circumstance}
-        />
-        <AdditionalInfoCard
-          onPressEdit={editAdditionalInfo}
-          detaineeDeclaration={detaineeDeclaration}
-          additionalInfo={additionalInfo}
-          lawyerName={defenseDetails?.name}
-          telephoneNumber={defenseDetails?.phoneNumber}
-        />
+        <ArrestInformationCard arrestDraft={arrestDraft} />
       </KeyboardAwareScrollView>
       {renderPopups()}
       {renderFooter()}

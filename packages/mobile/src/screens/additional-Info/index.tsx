@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {View, BackHandler, ScrollView, Image, TouchableOpacity} from 'react-native';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {useTranslation} from 'react-i18next';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -9,22 +9,19 @@ import {goBack, navigateTo} from '@navigation/navigationUtils';
 import {routes} from '@constants/labels';
 import {showToast} from '@components/customToast';
 
-import {apiMethods, endPoints} from 'shared';
 import {defenceAssignmentList, fontWeights, mediaTypes} from '@constants/general';
+import {setArrestDraft} from '@screens/review-arrest-details/arrestDraftSlice';
+import {isValidEmail, isValidPhoneNumber} from '@utils/common';
 import useUploadMedia from '@utils/useUploadMedia';
-import useApi from '@api/useApi';
 import FilePicker from '@components/filePicker';
-import CustomLoader from '@components/customLoader';
 import CustomHeader from '@components/customHeader';
 import CustomText from '@components/customText';
-import CustomTextInput from '@components/customTextInput';
 import CustomButton from '@components/customButton';
 import CustomDetaineeDeclaration from '@components/customDetaineeDeclaration';
 import CustomCamera from '@components/customCamera';
 import Progress from '@components/progress';
-import CircleWarning from '@assets/svg/circleWarning.svg';
-import CustomPopup from '@components/customPopup';
-import Close from '@assets/svg/close.svg';
+import Camera from '@assets/svg/camera.svg';
+import DeleteIcon from '@assets/svg/delete.svg';
 import styles from './styles';
 
 type AdditionalInfoProps = {
@@ -36,23 +33,27 @@ type AdditionalInfoProps = {
   };
 };
 
+const additionalDocFileName = 'additionalPhoto.jpg';
+const userImageFileName = 'suspectImage.jpg';
+
 function AdditionalInfo(props: AdditionalInfoProps): React.JSX.Element {
   const {colors} = useSelector((state: RootState) => state.theme);
+  const {collectMinimumDetails} = useSelector((state: RootState) => state.feature);
   const {arrestDraft} = useSelector((state: RootState) => state.arrestDraft);
   const {t} = useTranslation();
-  const {callApi, loading} = useApi();
+  const dispatch = useDispatch();
   const {uploadMedia, loading: imageUploading} = useUploadMedia();
   const routeParams = props?.route?.params;
+  const totalSteps = collectMinimumDetails ? 2 : 4;
+  const currentStep = collectMinimumDetails ? 2 : 4;
 
-  const [showClosePopup, setShowClosePopup] = useState(false);
   const [detaineeDeclarationData, setDetaineeDeclarationData] = useState(null);
-  const [arrestId, setArrestId] = useState(routeParams?.arrestId);
   const [isEditAndSubmit, setIsEditAndSubmit] = useState(routeParams?.isEditAndSubmit);
-  const [additionalInformation, setAdditionalInformation] = useState('');
-  const [additionalPhotos, setAdditionalPhotos] = useState([]);
   const [arrestDocuments, setArrestDocuments] = useState([]);
-  const [defenceLawyerName, setDefenceLawyerName] = useState('');
-  const [defenceLawyerContact, setDefenceLawyerContact] = useState('');
+  const [defenseLawyerName, setDefenseLawyerName] = useState('');
+  const [defenseLawyerContact, setDefenseLawyerContact] = useState('');
+  const [defenseLawyerEmail, setDefenseLawyerEmail] = useState('');
+  const [mediaData, setMediaData] = useState(null);
 
   const themeStyle = {
     background: {
@@ -69,6 +70,9 @@ function AdditionalInfo(props: AdditionalInfoProps): React.JSX.Element {
     },
     red: {
       color: colors?.RED
+    },
+    card: {
+      backgroundColor: colors?.CARD_BACKGROUND
     }
   };
 
@@ -81,46 +85,59 @@ function AdditionalInfo(props: AdditionalInfoProps): React.JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (routeParams?.arrestId?.length > 0) setArrestId(routeParams?.arrestId);
     if (routeParams?.isEditAndSubmit) setIsEditAndSubmit(routeParams?.isEditAndSubmit);
   }, [routeParams]);
 
   useEffect(() => {
-    if (arrestId) {
-      const {detaineeDeclaration, additionalInfo, defenseDetails} = arrestDraft;
-      const updatedDetaineeDeclaration = defenceAssignmentList.find(
-        (item) => item.value === detaineeDeclaration
-      );
+    const {defenceAssignment, defenceLawyer} = arrestDraft;
+    const updatedDetaineeDeclaration = defenceAssignmentList.find(
+      (item) => item.value === defenceAssignment
+    );
 
-      setDetaineeDeclarationData(updatedDetaineeDeclaration);
-      setAdditionalInformation(additionalInfo);
-      setDefenceLawyerName(defenseDetails?.name);
-      setDefenceLawyerContact(defenseDetails?.phoneNumber);
-    }
-  }, [arrestId]);
+    setDetaineeDeclarationData(updatedDetaineeDeclaration);
+    setDefenseLawyerName(defenceLawyer?.name);
+    setDefenseLawyerContact(defenceLawyer?.phoneNumber);
+    setDefenseLawyerEmail(defenceLawyer?.email);
+    setArrestDocuments(arrestDraft?.documents || []);
+    setMediaData(arrestDraft?.userImage);
+  }, [arrestDraft]);
 
   const getPersonalDetailsData = async () => {
     const defenceLawyer =
       detaineeDeclarationData?.value === 'SUSPECT_GIVEN'
-        ? {defenceLawyerName, defenceLawyerContact}
+        ? {
+          name: defenseLawyerName?.trim(),
+          phoneNumber: defenseLawyerContact,
+          email: defenseLawyerEmail?.length > 0 ? defenseLawyerEmail?.trim() : null
+        }
         : null;
 
     return {
-      arrestId,
-      arrestData: {
-        defenceAssignment: detaineeDeclarationData?.value,
-        defenceLawyer,
-        additionalInfo: additionalInformation,
-        arrestDocuments
-      }
+      defenceAssignment: detaineeDeclarationData?.value,
+      defenceLawyer,
+      documents: arrestDocuments,
+      userImage: mediaData
     };
   };
 
-  const onPressNext = async (navigationScreen?: string) => {
+  const saveArrestData = async () => {
     const data = await getPersonalDetailsData();
-    const {defenceAssignment, arrestDocuments} = data?.arrestData || {};
+    const defenceLawyerContact = data?.defenceLawyer?.phoneNumber;
 
-    const isMandatoryFieldsFilled = defenceAssignment?.length > 0 && arrestDocuments.length > 0;
+    if (defenceLawyerContact?.length > 0 && !isValidPhoneNumber(defenceLawyerContact)) {
+      showToast(t('invalid_phone_number'), {type: 'error'});
+
+      return;
+    }
+
+    if (defenseLawyerEmail?.length > 0 && !isValidEmail(defenseLawyerEmail?.trim())) {
+      showToast(t('invalid_email'), {type: 'error'});
+
+      return;
+    }
+
+    const isMandatoryFieldsFilled =
+      detaineeDeclarationData?.value?.length > 0 && arrestDocuments?.length > 0;
 
     if (!data || !isMandatoryFieldsFilled) {
       showToast(t('fill_mandatory_fields'), {type: 'error'});
@@ -128,24 +145,13 @@ function AdditionalInfo(props: AdditionalInfoProps): React.JSX.Element {
       return null;
     }
 
-    const options = {
-      method: apiMethods.put,
-      endpoint: endPoints.editArrest,
-      data
-    };
+    dispatch(setArrestDraft(data));
+  };
 
-    try {
-      const response = await callApi(options);
-
-      if (response?.data?.statusCode === 200)
-        if (navigationScreen?.length > 0) navigateTo(navigationScreen);
-        else if (isEditAndSubmit) goBack();
-        else navigateTo(routes.REVIEW_ARREST_DETAILS, {arrestId});
-
-      if (response?.error?.errors) showToast(response?.error?.errors[0], {type: 'error'});
-    } catch (error) {
-      showToast(t('failed_to_save_data'), {type: 'error'});
-    }
+  const onPressNext = async () => {
+    await saveArrestData();
+    if (isEditAndSubmit) goBack();
+    else navigateTo(routes.REVIEW_ARREST_DETAILS);
   };
 
   const handleBackButton = () => {
@@ -154,50 +160,104 @@ function AdditionalInfo(props: AdditionalInfoProps): React.JSX.Element {
     return true;
   };
 
-  const onPressDiscard = () => {
-    navigateTo(routes.HOME_TABS);
-    setShowClosePopup(false);
+  const backButtonPress = async () => {
+    const data = await getPersonalDetailsData();
+
+    dispatch(setArrestDraft(data));
+
+    handleBackButton();
+  };
+
+  const onGetImage = async (image) => {
+    const mediaData = await uploadMedia({
+      mediaName: userImageFileName,
+      mediaUrl: image,
+      mediaType: mediaTypes.USER_AVTAR
+    });
+
+    setMediaData({
+      mediaLocalUrl: image,
+      mediaType: mediaTypes.USER_AVTAR,
+      mediaKey: mediaData.key,
+      mediaName: userImageFileName
+    });
   };
 
   const onCameraResponse = async (photo) => {
-    setAdditionalPhotos([photo, ...additionalPhotos]);
     const mediaData = await uploadMedia({
-      mediaName: `suspect_photo`,
+      mediaName: additionalDocFileName,
       mediaUrl: photo,
-      mediaType: 'USER_AVTAR'
+      mediaType: mediaTypes.PROOF_DOCUMENT
     });
 
     setArrestDocuments([
       {
-        mediaName: `suspect_photo`,
+        mediaLocalUrl: photo,
+        mediaName: additionalDocFileName,
         mediaKey: mediaData.key,
-        mediaType: mediaTypes.ADDITIONAL_EVIDENCE_FILES
+        mediaType: mediaTypes.PROOF_DOCUMENT
       },
       ...arrestDocuments
     ]);
   };
 
+  const onFilePickerResponse = async (images) => {
+    if (images?.length > 0) {
+      const image = images[0]?.uri;
+
+      const mediaData = await uploadMedia({
+        mediaName: additionalDocFileName,
+        mediaUrl: image,
+        mediaType: mediaTypes.PROOF_DOCUMENT
+      });
+
+      setArrestDocuments([
+        {
+          mediaLocalUrl: image,
+          mediaName: additionalDocFileName,
+          mediaKey: mediaData.key,
+          mediaType: mediaTypes.PROOF_DOCUMENT
+        },
+        ...arrestDocuments
+      ]);
+    }
+  };
+
   const removeItem = (index) => {
-    const updatedPhotos = additionalPhotos.filter((_, i) => i !== index);
     const updatedDocuments = arrestDocuments.filter((_, i) => i !== index);
 
-    setAdditionalPhotos(updatedPhotos);
     setArrestDocuments(updatedDocuments);
   };
 
-  const primaryButtonAction = () => {
-    setShowClosePopup(false);
-    onPressNext(routes.HOME_TABS);
+  const renderSuspectImagePreview = (setVisible: (show: boolean) => void) => {
+    return (
+      <View style={[styles.previewContainer, themeStyle.line]}>
+        <View style={styles.previewImageContainer}>
+          <TouchableOpacity style={styles.closeButton} onPress={() => setMediaData(null)}>
+            <DeleteIcon />
+          </TouchableOpacity>
+          {mediaData?.mediaLocalUrl?.length > 0 && (
+            <Image source={{uri: mediaData?.mediaLocalUrl}} style={styles.previewImage} />
+          )}
+        </View>
+        <TouchableOpacity style={styles.reTakeButton} onPress={() => setVisible(true)}>
+          <Camera />
+          <CustomText style={styles.reTakeText}>{t('retake_image')}</CustomText>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   const renderFooter = () => {
     return (
       <View style={styles.footer}>
         <CustomButton
+          disabled={imageUploading}
+          loading={imageUploading}
           textStyle={styles.buttonText}
           style={styles.nextButton}
           onPress={onPressNext}
-          title={isEditAndSubmit ? t('save') : t('save_next')}
+          title={isEditAndSubmit ? t('save') : t('next')}
         />
       </View>
     );
@@ -216,13 +276,13 @@ function AdditionalInfo(props: AdditionalInfoProps): React.JSX.Element {
   const renderPhotos = () => {
     return (
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoContainer}>
-        {additionalPhotos.map((photo, index) => (
-          <TouchableOpacity onPress={() => removeItem(index)} key={photo} style={styles.photo}>
-            <View style={styles.removeIcon}>
-              <Close width={25} height={25} />
-            </View>
-            <Image source={{uri: photo}} style={styles.photoImage} />
-          </TouchableOpacity>
+        {arrestDocuments?.map((document, index) => (
+          <View key={document?.mediaLocalUrl || document?.mediaKey} style={styles.photo}>
+            <TouchableOpacity onPress={() => removeItem(index)} style={styles.removeIcon}>
+              <DeleteIcon />
+            </TouchableOpacity>
+            <Image source={{uri: document.mediaLocalUrl}} style={styles.photoImage} />
+          </View>
         ))}
       </ScrollView>
     );
@@ -233,33 +293,34 @@ function AdditionalInfo(props: AdditionalInfoProps): React.JSX.Element {
       <View style={styles.formContainer}>
         {renderTitle(t('detainee_declaration'), true)}
         <CustomDetaineeDeclaration
-          setDefenceLawyerName={setDefenceLawyerName}
-          setDefenceLawyerContact={setDefenceLawyerContact}
-          defenceLawyerName={defenceLawyerName}
-          defenceLawyerContact={defenceLawyerContact}
+          setDefenceLawyerName={setDefenseLawyerName}
+          setDefenceLawyerContact={setDefenseLawyerContact}
+          defenceLawyerName={defenseLawyerName}
+          defenceLawyerContact={defenseLawyerContact}
+          defenceLawyerEmail={defenseLawyerEmail}
+          setDefenceLawyerEmail={setDefenseLawyerEmail}
           item={detaineeDeclarationData}
           onSelectItem={setDetaineeDeclarationData}
           list={defenceAssignmentList}
         />
-        {renderTitle(t('additional_information'))}
-        <CustomTextInput
-          placeholder={t('enter_additional_information')}
-          multiline
-          value={additionalInformation}
-          onChangeText={setAdditionalInformation}
-          containerStyle={styles.additionalInfo}
+        {renderTitle(t('photo_of_suspect'))}
+        <CustomCamera
+          type={'suspect_image'}
+          uri={mediaData?.mediaLocalUrl}
+          onResponse={onGetImage}
+          renderPreview={(setVisible) => renderSuspectImagePreview(setVisible)}
+          cameraButtonStyle={styles.cameraContainer}
         />
         {renderTitle(t('additional_photos'), true)}
         <View style={styles.row}>
           <View style={styles.half}>
             <CustomCamera
               onResponse={onCameraResponse}
-              uploading={imageUploading}
               cameraButtonStyle={styles.cameraContainer}
             />
           </View>
           <View style={styles.half}>
-            <FilePicker />
+            <FilePicker onPickImages={onFilePickerResponse} />
           </View>
         </View>
         {renderPhotos()}
@@ -267,44 +328,24 @@ function AdditionalInfo(props: AdditionalInfoProps): React.JSX.Element {
     );
   };
 
-  const renderPopups = () => {
-    return (
-      <>
-        <CustomPopup
-          title={t('save_your_progress')}
-          description={t('you_havent_completed')}
-          buttonProps={{
-            primaryButtonTitle: t('save'),
-            secondaryButtonTitle: t('discard'),
-            secondaryButtonAction: onPressDiscard,
-            primaryButtonAction: primaryButtonAction
-          }}
-          icon={<CircleWarning />}
-          visible={showClosePopup}
-          setVisible={setShowClosePopup}
-        />
-      </>
-    );
-  };
-
   return (
     <View style={[styles.container, themeStyle.background]}>
       <CustomHeader
         showBackButton
-        onClosePress={() => setShowClosePopup(true)}
-        showCloseButton
-        mainTitle={t('additional_info')}
+        mainTitle={collectMinimumDetails ? t('arrest_information') : t('additional_info')}
+        showLanguageSelector
+        onBackPress={backButtonPress}
       />
-      {!isEditAndSubmit && <Progress style={styles.progress} totalStep={4} step={4} />}
+      {!isEditAndSubmit && (
+        <Progress style={styles.progress} totalStep={totalSteps} step={currentStep} />
+      )}
       <KeyboardAwareScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
         {renderForm()}
       </KeyboardAwareScrollView>
-      {renderPopups()}
       {renderFooter()}
-      {loading && <CustomLoader />}
     </View>
   );
 }

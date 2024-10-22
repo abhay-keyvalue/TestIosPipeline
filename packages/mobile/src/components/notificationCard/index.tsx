@@ -16,10 +16,10 @@ type NotificationCardProps = {
   data: {
     id: string;
     arrestId: string;
-    suspectName: string;
+    title: string;
     isRead: boolean;
     createdAt: string;
-    avatarThumbnail?: string;
+    thumbnail?: string;
     message?: string;
     caseNumber?: string;
   };
@@ -44,7 +44,7 @@ const NotificationCard = ({onPress = () => {}, data}: NotificationCardProps) => 
     }
   };
 
-  const {id, caseNumber, suspectName, avatarThumbnail, message, isRead, createdAt} = data;
+  const {id, caseNumber, title, thumbnail, message, isRead, createdAt} = data;
 
   const readNotification = async () => {
     const options = {
@@ -69,13 +69,13 @@ const NotificationCard = ({onPress = () => {}, data}: NotificationCardProps) => 
       style={[styles.container, isRead ? themeStyle.container : themeStyle.unread]}
     >
       <View style={styles.image}>
-        {avatarThumbnail?.length > 0 && <CustomImage source={{uri: avatarThumbnail}} />}
+        {thumbnail?.length > 0 && <CustomImage source={{uri: thumbnail}} />}
       </View>
       <View style={styles.textContainer}>
         <View style={styles.row}>
           <CustomText numberOfLines={2} style={[styles.id, themeStyle.subText]}>
             <CustomText fontWeight={fontWeights.MEDIUM} style={[styles.title, themeStyle.text]}>
-              {suspectName || "Suspect's Name"}
+              {title || "Suspect's Name"}
             </CustomText>
             {'  '}
             {caseNumber || 'CASE-ID'}

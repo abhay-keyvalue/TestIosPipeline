@@ -86,9 +86,9 @@ export const genderList = [
 ];
 
 export const defenceAssignmentList = [
-  {id: 1, label: 'does_not_want_lawyer', value: 'NONE'},
+  {id: 3, label: 'already_has_lawyer', value: 'SUSPECT_GIVEN'},
   {id: 2, label: 'request_assign_lawyer', value: 'SYSTEM_ASSIGNED'},
-  {id: 3, label: 'already_has_lawyer', value: 'SUSPECT_GIVEN'}
+  {id: 1, label: 'does_not_want_lawyer', value: 'NONE'}
 ];
 
 export const S3_URL_DOMAIN_SUBSTRING = 'crtap-dev-ff-court-app.s3.eu-central-1.amazonaws.com';

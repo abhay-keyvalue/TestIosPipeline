@@ -19,6 +19,8 @@ type CustomRadioSelectorProps = {
   wrap?: boolean;
   setDefenceLawyerName?: (value: string) => void;
   setDefenceLawyerContact?: (value: string) => void;
+  setDefenceLawyerEmail?: (value: string) => void;
+  defenceLawyerEmail?: string;
   defenceLawyerName?: string;
   defenceLawyerContact?: string;
 };
@@ -37,6 +39,8 @@ const CustomDetaineeDeclaration = ({
   wrap = false,
   defenceLawyerName,
   defenceLawyerContact,
+  defenceLawyerEmail,
+  setDefenceLawyerEmail,
   setDefenceLawyerName,
   setDefenceLawyerContact
 }: CustomRadioSelectorProps) => {
@@ -75,6 +79,12 @@ const CustomDetaineeDeclaration = ({
           value={defenceLawyerName}
           onChangeText={setDefenceLawyerName}
           placeholder={t('enter_name_of_lawyer')}
+        />
+        {renderTitle(t('email'))}
+        <CustomTextInput
+          value={defenceLawyerEmail}
+          onChangeText={setDefenceLawyerEmail}
+          placeholder={t('email_id')}
         />
         {renderTitle(t('telephone_number'))}
         <CustomPhoneInput

@@ -1,6 +1,9 @@
 import Geolocation from 'react-native-geolocation-service';
 import axios from 'axios';
 import {t} from 'i18next';
+import {PhoneNumberUtil} from 'google-libphonenumber';
+
+const phoneUtil = PhoneNumberUtil.getInstance();
 
 import {checkRequestLocationPermission, RESULTS} from '@utils/permission';
 import {apiRequest} from '@api/index';
@@ -64,24 +67,33 @@ export const getCityName = async (lat, long) => {
   }
 };
 
-export const getCurrentLocation = async (): Promise<string> => {
+export const getCurrentLocation = async () => {
   const location = await getLocation();
   const data = await getCityName(location.latitude, location.longitude);
 
-  let city: string = '';
+  let locationName: string = '';
   const address = data?.address;
 
-  if (address) {
-    const {town, village, suburb, state_district, state} = address;
+  const {town, village, suburb, state_district, state, road, city, country, postcode} =
+    address || {};
 
-    const cityParts = [town, village, suburb, state_district, state].filter(Boolean);
+  const cityParts = [town, village, suburb, state_district, state].filter(Boolean);
 
-    city = cityParts.splice(0, 2).join(', ');
-  }
+  locationName = cityParts.splice(0, 2).join(', ');
 
-  if (city.length === 0) showToast(t('Unable to get location'), {type: 'error'});
+  const locationData = {
+    locRoad: road,
+    locSuburb: suburb,
+    locCity: city,
+    locCount: country,
+    locStateDistrict: state_district,
+    locState: state,
+    locPostcode: postcode
+  };
 
-  return city;
+  if (locationName.length === 0) showToast(t('Unable to get location'), {type: 'error'});
+
+  return {locationName, locationData};
 };
 
 export const debounce = (func, wait) => {
@@ -94,4 +106,21 @@ export const debounce = (func, wait) => {
       func.apply(this, args);
     }, wait);
   };
+};
+
+export const isValidPhoneNumber = (phoneNumber: string): boolean => {
+  try {
+    const parsedNumber = phoneUtil.parse(phoneNumber, null);
+    const isValid = phoneUtil.isValidNumber(parsedNumber);
+
+    return isValid;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+  return emailRegex.test(email);
 };

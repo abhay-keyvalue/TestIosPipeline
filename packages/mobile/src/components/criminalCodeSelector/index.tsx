@@ -69,7 +69,7 @@ const CriminalCodeSelector = ({
   };
 
   useEffect(() => {
-    setSelectedItems(selectedList);
+    setSelectedItems(selectedList || []);
   }, [selectedList]);
 
   useEffect(() => {
@@ -95,7 +95,7 @@ const CriminalCodeSelector = ({
   };
 
   const onPressItem = (item: Item) => {
-    const index = selectedItems.findIndex((selectedItem) => selectedItem.id === item.id);
+    const index = selectedItems?.findIndex((selectedItem) => selectedItem.id === item.id);
 
     if (index > -1) {
       const newItems = [...selectedItems];
@@ -117,7 +117,7 @@ const CriminalCodeSelector = ({
   };
 
   const renderCard = ({item}) => {
-    const isSelected = selectedItems.findIndex((selectedItem) => selectedItem.id === item.id) > -1;
+    const isSelected = selectedItems?.findIndex((selectedItem) => selectedItem.id === item.id) > -1;
 
     return (
       <TouchableOpacity
@@ -163,7 +163,7 @@ const CriminalCodeSelector = ({
   const renderSelectedItems = () => {
     return (
       <View style={styles.selectedItemsContainer}>
-        {selectedItems.map((item) => (
+        {selectedItems?.map((item) => (
           <View key={item.id} style={[styles.selectedItem, themeStyle.selectedItem]}>
             <View>
               <CustomText style={[styles.selectedItemTitle, themeStyle.subText]}>

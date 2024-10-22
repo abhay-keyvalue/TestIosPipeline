@@ -35,7 +35,7 @@ const ArrestStatusCard = ({status, type}: ArrestStatusCardType) => {
       case 'police':
         return <Shield width={15} height={15} />;
       default:
-        return <Tick width={15} height={15} />;
+        return <Tick width={22} height={22} />;
     }
   }, [type]);
 
@@ -54,7 +54,8 @@ const ArrestStatusCard = ({status, type}: ArrestStatusCardType) => {
 const styles = ScaledSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: '1@s',
     borderRadius: '10@s',
     flex: 1,
@@ -62,9 +63,8 @@ const styles = ScaledSheet.create({
     padding: '6@s'
   },
   text: {
-    marginLeft: '4@s',
-    fontSize: '13@s',
-    flex: 1
+    marginLeft: '8@s',
+    fontSize: '13@s'
   },
   iconContainer: {
     width: '20@s',

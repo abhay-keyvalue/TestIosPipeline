@@ -1,5 +1,5 @@
 import React from 'react';
-import {TouchableOpacity} from 'react-native';
+import {ActivityIndicator, TouchableOpacity} from 'react-native';
 import {useSelector} from 'react-redux';
 import {ScaledSheet} from 'react-native-size-matters';
 
@@ -13,9 +13,17 @@ type CustomButtonProps = {
   textStyle?: object;
   onPress: () => void;
   disabled?: boolean;
+  loading?: boolean;
 };
 
-const CustomButton = ({title, style, disabled, textStyle, ...props}: CustomButtonProps) => {
+const CustomButton = ({
+  title,
+  style,
+  disabled,
+  loading,
+  textStyle,
+  ...props
+}: CustomButtonProps) => {
   const {colors} = useSelector((state: RootState) => state.theme);
 
   const themeStyle = {
@@ -33,9 +41,16 @@ const CustomButton = ({title, style, disabled, textStyle, ...props}: CustomButto
       style={[styles.button, themeStyle.button, style, disabled && styles.disabled]}
       {...props}
     >
-      <CustomText fontWeight={fontWeights.MEDIUM} style={[styles.text, themeStyle.text, textStyle]}>
-        {title}
-      </CustomText>
+      {loading ? (
+        <ActivityIndicator color={colors?.LIGHT} />
+      ) : (
+        <CustomText
+          fontWeight={fontWeights.MEDIUM}
+          style={[styles.text, themeStyle.text, textStyle]}
+        >
+          {title}
+        </CustomText>
+      )}
     </TouchableOpacity>
   );
 };

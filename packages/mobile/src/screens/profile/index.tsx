@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {ScrollView, TouchableOpacity, View} from 'react-native';
 import {useSelector} from 'react-redux';
 import {useTranslation} from 'react-i18next';
@@ -6,12 +6,13 @@ import {ScaledSheet} from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type {RootState} from '@src/store';
-import {navigateAndReset} from '@navigation/navigationUtils';
+import {navigateAndReset, navigateTo} from '@navigation/navigationUtils';
 import {apiMethods, endPoints} from 'shared';
 import {routes} from '@constants/labels';
 import {showToast} from '@components/customToast';
 import {fontWeights} from '@constants/general';
 import CustomImage from '@components/customImage';
+import Chart from '@components/chart';
 import useApi from '@api/useApi';
 import CustomHeader from '@components/customHeader';
 import CustomLoader from '@components/customLoader';
@@ -19,11 +20,32 @@ import CustomText from '@components/customText';
 import RightArrow from '@assets/svg/rightArrow.svg';
 import Exit from '@assets/svg/exit.svg';
 
+type StatisticsDataType = {
+  monthlyArrestResponses?: {
+    [key: string]: {
+      [key: string]: {
+        count: number;
+      };
+    };
+  };
+};
+
+type Item = {
+  id: number;
+  label: string | number;
+  type?: string;
+  value?: string | number;
+};
+
 function Profile(): React.JSX.Element {
   const {colors} = useSelector((state: RootState) => state.theme);
   const {profileData} = useSelector((state: RootState) => state.home);
   const {loading, callApi} = useApi();
+  const statisticsApi = useApi();
   const {t} = useTranslation();
+
+  const [statisticsData, setStatisticsData] = useState<StatisticsDataType>(null);
+  const [noOfMonths, setNoOfMonths] = useState<Item>({id: 2, label: 'Last 6 months', value: 6});
 
   const themeStyle = {
     container: {
@@ -43,8 +65,28 @@ function Profile(): React.JSX.Element {
   const {name, id, role, email, phoneNumber, policeStation, location, avatar, badgeNumber} =
     profileData;
 
+  useEffect(() => {
+    fetchStatistics();
+  }, [noOfMonths.value]);
+
   const onPressSettingsAndPrivacy = () => {
-    // TO DO
+    navigateTo(routes.SETTINGS_AND_PRIVACY);
+  };
+
+  const fetchStatistics = async () => {
+    const options = {
+      method: apiMethods.get,
+      endpoint: endPoints.statistics,
+      params: {months: noOfMonths.value}
+    };
+
+    const response = await statisticsApi.callApi(options);
+
+    if (response?.data?.data) {
+      const summaryData: StatisticsDataType = response?.data?.data;
+
+      setStatisticsData(summaryData);
+    }
   };
 
   const onPressHelpAndSupport = () => {
@@ -190,11 +232,16 @@ function Profile(): React.JSX.Element {
 
   return (
     <View style={[styles.container, themeStyle.container]}>
-      <CustomHeader title={t('my_profile')} />
+      <CustomHeader mainTitle={t('my_profile')} />
       {loading && <CustomLoader />}
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.content}>
+      <ScrollView style={styles.content}>
         {renderInspectorCard()}
         {renderProfileCard()}
+        <Chart
+          noOfMonths={noOfMonths}
+          setNoOfMonths={setNoOfMonths}
+          statisticsData={statisticsData}
+        />
         {bottomCardItems?.map((item) => renderProfileBottomCard(item))}
       </ScrollView>
     </View>

@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import type {RegisteredStyle} from 'react-native';
 import {TouchableOpacity, Modal, View, FlatList} from 'react-native';
 import {ScaledSheet} from 'react-native-size-matters';
 import {useSelector} from 'react-redux';
@@ -15,11 +16,12 @@ type CustomSelectorProps = {
   list: Item[];
   placeHolder?: string;
   title?: string;
+  style?: RegisteredStyle<{[key: string]: string | number}>;
 };
 
 type Item = {
   id: number;
-  label: string;
+  label: string | number;
   type?: string;
   value?: string | number;
 };
@@ -29,7 +31,8 @@ const CustomSelector = ({
   item,
   list,
   placeHolder,
-  title
+  title,
+  style
 }: CustomSelectorProps) => {
   const {colors} = useSelector((state: RootState) => state.theme);
   const {t} = useTranslation();
@@ -81,7 +84,7 @@ const CustomSelector = ({
     return (
       <TouchableOpacity
         onPress={() => setVisible(true)}
-        style={[styles.selectorBox, themeStyle.border]}
+        style={[styles.selectorBox, themeStyle.border, style]}
       >
         <CustomText
           style={[
@@ -184,7 +187,8 @@ const styles = ScaledSheet.create({
   },
   iconContainer: {
     marginTop: '2@vs',
-    marginRight: '2@s'
+    marginRight: '2@s',
+    marginLeft: '2@s'
   }
 });
 

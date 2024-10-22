@@ -1,16 +1,18 @@
 import React, {useEffect} from 'react';
-import {StyleSheet, View, SafeAreaView} from 'react-native';
+import {StyleSheet, View, SafeAreaView, Linking} from 'react-native';
+import {navigateTo} from '@navigation/navigationUtils';
 import {useDispatch, useSelector} from 'react-redux';
 import {useTranslation} from 'react-i18next';
 
 import type {RootState} from '@src/store';
-import Root from '@navigation/root';
 import {Theme} from '@interface/common';
 import {setThemeData} from '@utils/themeSlice';
+import {routes} from '@constants/labels';
 import {
   checkRequestLocationPermission,
   checkRequestPushNotificationPermission
 } from '@utils/permission';
+import Root from '@navigation/root';
 import NetworkLogs from '@components/networkLogs';
 
 function Init(): React.JSX.Element {
@@ -40,10 +42,41 @@ function Init(): React.JSX.Element {
     if (selectedLocalCode !== i18n.language) i18n.changeLanguage(selectedLocalCode);
   };
 
+  const manageLinks = async (url) => {
+    if (!url) return null;
+
+    // TO DO: Logic should be changed based on the requirement
+    if (url.includes('reset-password')) {
+      const token = url?.split('?token=')?.[1];
+
+      navigateTo(routes.RESET_PASSWORD, {token});
+    }
+  };
+
   useEffect(() => {
     requestPermissions();
     manageAppLanguage();
     manageTheme();
+
+    const handleInitialUrl = async () => {
+      const initialUrl = await Linking.getInitialURL();
+
+      manageLinks(initialUrl);
+    };
+
+    const handleLinkingEvent = (event) => {
+      const url = event.url;
+
+      manageLinks(url);
+    };
+
+    handleInitialUrl();
+
+    const linkingListener = Linking.addEventListener('url', handleLinkingEvent);
+
+    return () => {
+      linkingListener.remove();
+    };
   }, []);
 
   const themeStyle = {

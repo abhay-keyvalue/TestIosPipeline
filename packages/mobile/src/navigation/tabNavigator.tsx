@@ -61,6 +61,7 @@ const renderTabBarIcon = (route: string, focused: boolean, colors: {[key: string
 
 const BottomTabs = () => {
   const {colors} = useSelector((state: RootState) => state.theme);
+  const {hideArrestTab} = useSelector((state: RootState) => state.feature);
 
   return (
     <Tab.Navigator
@@ -85,7 +86,9 @@ const BottomTabs = () => {
       })}
     >
       <Tab.Screen options={{headerShown: false}} name='Home' component={Home} />
-      <Tab.Screen options={{headerShown: false}} name='Arrests' component={Arrests} />
+      {!hideArrestTab && (
+        <Tab.Screen options={{headerShown: false}} name='Arrests' component={Arrests} />
+      )}
       <Tab.Screen options={{headerShown: false}} name='Notifications' component={Notifications} />
       <Tab.Screen options={{headerShown: false}} name='Profile' component={Profile} />
     </Tab.Navigator>

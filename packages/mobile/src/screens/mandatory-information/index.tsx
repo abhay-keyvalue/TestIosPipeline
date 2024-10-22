@@ -1,38 +1,37 @@
 import React, {useEffect, useState} from 'react';
-import {View, BackHandler} from 'react-native';
+import {View, BackHandler, TouchableOpacity, Image} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {useTranslation} from 'react-i18next';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import dateFormat from 'dateformat';
 
 import type {RootState} from '@src/store';
-import {apiMethods, endPoints} from 'shared';
 import {goBack, navigateTo} from '@navigation/navigationUtils';
 import {setArrestDraft} from '@screens/review-arrest-details/arrestDraftSlice';
 import {routes} from '@constants/labels';
-import {fontWeights, genderList, mediaTypes} from '@constants/general';
+import {documentTypes, fontWeights, genderList, isIOS, mediaTypes} from '@constants/general';
 import {getCurrentLocation} from '@utils/common';
 import {showToast} from '@components/customToast';
-import CustomLoader from '@components/customLoader';
 import useUploadMedia from '@utils/useUploadMedia';
-import useApi from '@api/useApi';
-import CriminalCodeSelector from '@components/criminalCodeSelector';
+// import CriminalCodeSelector from '@components/criminalCodeSelector';
 import CustomSelector from '@components/customSelector';
+import VoiceRecorder from '@components/voiceRecorder';
+import VoicePlayer from '@components/voicePlayer';
 import CustomCamera from '@components/customCamera';
 import CustomHeader from '@components/customHeader';
 import CustomText from '@components/customText';
 import CustomTextInput from '@components/customTextInput';
 import CustomButton from '@components/customButton';
 import CustomDatePicker from '@components/datePicker';
-import CustomPopup from '@components/customPopup';
 import Progress from '@components/progress';
-import CircleTick from '@assets/svg/circleTick.svg';
-import CircleWarning from '@assets/svg/circleWarning.svg';
 import Clock from '@assets/svg/clock.svg';
 import Map from '@assets/svg/map.svg';
+import Check from '@assets/svg/check.svg';
+import Uncheck from '@assets/svg/uncheck.svg';
 import styles from './styles';
 
 const documentName = 'idCard.jpg';
+const recordingName = isIOS ? 'recording.m4a' : 'recording.mp3';
 
 type MandatoryInformationProps = {
   route: {
@@ -43,49 +42,69 @@ type MandatoryInformationProps = {
   };
 };
 
-type SubmitDatType = {
-  arrestId?: string;
-  suspect?: {
-    name?: string;
-    gender?: string;
-    dob?: string;
-  };
+type SubmitDataType = {
+  name?: string;
+  gender?: string;
+  dob?: string;
+  isIdRefused?: boolean;
   proofDocument?: {
+    documentLocalUrl?: string;
+    documentType?: string;
     documentKey?: string;
     documentName?: string;
   };
-  arrestData?: {
-    offenceDetails?: string;
-    offenceIds?: string[];
-    locationName?: string;
-    circumstance?: string;
+  criminalOffence?: string;
+  offences?: Array<{
+    id?: string;
+    article?: string;
+    description?: string;
+  }>;
+  locationName?: string;
+  circumstance?: string;
+  locationData?: {
+    locRoad?: string;
+    locSuburb?: string;
+    locCity?: string;
+    locCounty?: string;
+    locStateDistrict?: string;
+    locState?: string;
+    locPostcode?: string;
   };
+  circumstanceRecording?: {
+    mediaType?: string;
+    mediaKey?: string;
+    mediaName?: string;
+    mediaLocalUrl?: string;
+  }[];
 };
 
 function MandatoryInformation(props: MandatoryInformationProps): React.JSX.Element {
   const {colors} = useSelector((state: RootState) => state.theme);
   const {arrestDraft} = useSelector((state: RootState) => state.arrestDraft);
+  const {collectMinimumDetails} = useSelector((state: RootState) => state.feature);
   const {t} = useTranslation();
-  const {callApi, loading} = useApi();
-  const {uploadMedia, loading: imageUploading} = useUploadMedia();
   const dispatch = useDispatch();
-  const getArrestApi = useApi();
+  const {uploadMedia, loading: imageUploading} = useUploadMedia();
+  const recodingUpload = useUploadMedia();
 
+  const totalSteps = collectMinimumDetails ? 2 : 4;
+  const currentStep = 1;
   const routeParams = props?.route?.params;
 
   const [name, setName] = useState('');
   const [dob, setDob] = useState(null);
   const [locationName, setLocationName] = useState('');
+  const [locationData, setLocationData] = useState(null);
   const [gender, setGender] = useState(null);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [showClosePopup, setShowClosePopup] = useState(false);
   const [idProofUrl, setIdProofUrl] = useState(null);
   const [offenceDetails, setOffenceDetails] = useState('');
   const [circumstance, setCircumstance] = useState('');
-  const [selectedCriminalCodeList, setSelectedCriminalCodeList] = useState([]);
+  const [isIdRefused, setIsIdRefused] = useState(false);
+  // const [selectedCriminalCodeList, setSelectedCriminalCodeList] = useState([]);
   const [mediaData, setMediaData] = useState(null);
-  const [arrestId, setArrestId] = useState(routeParams?.arrestId);
   const [isEditAndSubmit, setIsEditAndSubmit] = useState(routeParams?.isEditAndSubmit);
+  const [recordingUrl, setRecordingUrl] = useState(null);
+  const [recordingData, setRecordingData] = useState(null);
 
   const themeStyle = {
     background: {
@@ -118,7 +137,8 @@ function MandatoryInformation(props: MandatoryInformationProps): React.JSX.Eleme
       (async () => {
         const location = await getCurrentLocation();
 
-        setLocationName(location);
+        setLocationName(location?.locationName);
+        setLocationData(location?.locationData);
       })();
 
     return () => {
@@ -127,51 +147,31 @@ function MandatoryInformation(props: MandatoryInformationProps): React.JSX.Eleme
   }, []);
 
   useEffect(() => {
-    if (routeParams?.arrestId?.length > 0) setArrestId(routeParams?.arrestId);
     if (routeParams?.isEditAndSubmit) setIsEditAndSubmit(routeParams?.isEditAndSubmit);
   }, [routeParams]);
 
   useEffect(() => {
-    if (arrestId?.length > 0) getArrestDetails();
-  }, [arrestId]);
+    const genderData = genderList.find((item) => item.value === arrestDraft?.gender);
 
-  useEffect(() => {
-    if (arrestDraft?.caseNumber) {
-      const {suspect} = arrestDraft || {};
-      const genderData = genderList.find((item) => item.value === suspect?.gender);
+    if (arrestDraft?.locationName)
+      (async () => {
+        const location = await getCurrentLocation();
 
-      if (arrestDraft?.locationName)
-        (async () => {
-          const location = await getCurrentLocation();
+        setLocationName(location?.locationName);
+      })();
+    else setLocationName(arrestDraft?.locationName);
 
-          setLocationName(location);
-        })();
-      else setLocationName(arrestDraft?.locationName);
-
-      setName(suspect?.name);
-      if (suspect?.dob?.length > 0) setDob(new Date(suspect?.dob));
-      setGender(genderData);
-      setCircumstance(arrestDraft?.circumstance);
-      setOffenceDetails(arrestDraft?.criminalOffence);
-      setIdProofUrl(suspect?.proofDocument?.documentKey);
-      setSelectedCriminalCodeList(arrestDraft?.offences);
-    }
+    setName(arrestDraft?.name);
+    if (arrestDraft?.dob?.length > 0) setDob(new Date(arrestDraft?.dob));
+    setGender(genderData);
+    setCircumstance(arrestDraft?.circumstance);
+    setOffenceDetails(arrestDraft?.criminalOffence);
+    setIdProofUrl(arrestDraft?.proofDocument?.documentLocalUrl);
+    setIsIdRefused(arrestDraft?.isIdRefused);
+    // setSelectedCriminalCodeList(arrestDraft?.offences);
+    setRecordingUrl(arrestDraft?.circumstanceRecording?.mediaLocalUrl);
+    setRecordingData(arrestDraft?.circumstanceRecording);
   }, [arrestDraft]);
-
-  const getArrestDetails = async () => {
-    const options = {
-      method: apiMethods.get,
-      endpoint: `${endPoints.arrests}/${arrestId}`
-    };
-
-    try {
-      const response = await getArrestApi.callApi(options);
-
-      if (response?.data?.statusCode === 200) dispatch(setArrestDraft(response?.data?.data));
-    } catch (error) {
-      showToast(t('failed_to_save_data'), {type: 'error'});
-    }
-  };
 
   const handleBackButton = () => {
     goBack();
@@ -191,27 +191,33 @@ function MandatoryInformation(props: MandatoryInformationProps): React.JSX.Eleme
   };
 
   const takePictureButton = (type: string) => {
+    if (isIdRefused) return <CustomText>{'_'}</CustomText>;
+
     return (
       <CustomCamera
         type={type}
         uri={idProofUrl}
         uploading={imageUploading}
+        disabled={isIdRefused}
         onResponse={onGetImage}
+        renderPreview={renderPreview}
       />
     );
   };
 
-  const resetToHome = () => {
-    navigateTo(routes.HOME_TABS);
+  const renderPreview = (setVisible: (show: boolean) => void) => {
+    return (
+      <View style={[styles.previewContainer, themeStyle.line]}>
+        <CustomText style={[styles.documentName, themeStyle.text]}>{documentName}</CustomText>
+        {idProofUrl?.length > 0 && <Image source={{uri: idProofUrl}} style={styles.previewImage} />}
+        <TouchableOpacity style={styles.reTakeButton} onPress={() => setVisible(true)}>
+          <CustomText style={themeStyle.primary}>{t('retake')}</CustomText>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
-  const onPressCancel = () => {
-    navigateTo(routes.HOME_TABS);
-    setShowClosePopup(false);
-  };
-
-  const mandatoryValidation =
-    name?.length > 0 && offenceDetails?.length > 0 && selectedCriminalCodeList?.length > 0;
+  const mandatoryValidation = name?.length > 0 && offenceDetails?.length > 0;
 
   const getDraftData = async () => {
     if (!mandatoryValidation) {
@@ -220,78 +226,77 @@ function MandatoryInformation(props: MandatoryInformationProps): React.JSX.Eleme
       return null;
     }
 
-    const offenceIds = selectedCriminalCodeList.map((item) => item.id);
-
-    const data: SubmitDatType = {
-      suspect: {
-        name,
-        gender: gender?.value,
-        dob: dateFormat(dob, 'yyyy-mm-dd')
-      },
-      arrestData: {
-        offenceDetails,
-        offenceIds,
-        locationName,
-        circumstance
-      }
+    const data: SubmitDataType = {
+      name,
+      gender: gender?.value,
+      criminalOffence: offenceDetails,
+      // offences: selectedCriminalCodeList,
+      isIdRefused,
+      locationName,
+      circumstance,
+      circumstanceRecording: recordingData,
+      locationData
     };
+
+    if (dob != null) data.dob = dateFormat(dob, 'yyyy-mm-dd');
 
     if (mediaData?.key)
       data.proofDocument = {
+        documentLocalUrl: idProofUrl,
+        documentType: documentTypes.NATIONAL_ID,
         documentKey: mediaData?.key,
         documentName
       };
 
-    if (arrestDraft?.caseNumber?.length > 0) data.arrestId = arrestId;
-
     return data;
   };
 
-  const saveDraft = async (nextScreen?: boolean) => {
+  const onPressNext = async () => {
     const data = await getDraftData();
 
     if (!data) return null;
 
-    const isArrestUpdate = arrestDraft?.caseNumber?.length > 0;
+    dispatch(setArrestDraft(data));
 
-    const options = {
-      method: isArrestUpdate ? apiMethods.put : apiMethods.post,
-      endpoint: isArrestUpdate ? endPoints.editArrest : endPoints.draft,
-      data
-    };
+    navigateTo(collectMinimumDetails ? routes.ADDITIONAL_INFO : routes.PERSONAL_DETAILS);
+  };
 
-    try {
-      const response = await callApi(options);
+  const onRecordingEnd = async (url: string) => {
+    await uploadAudioRecording(url);
+    setRecordingUrl(url);
+  };
 
-      if (response?.data?.statusCode === 200)
-        if (isEditAndSubmit) goBack();
-        else if (nextScreen)
-          navigateTo(routes.PERSONAL_DETAILS, {arrestId: response?.data?.data?.id});
-        else setShowSuccessPopup(true);
+  const onPressClosePLayer = () => {
+    setRecordingUrl(null);
+    setRecordingData(null);
+  };
 
-      if (response?.error?.errors) showToast(response?.error?.errors[0], {type: 'error'});
-    } catch (error) {
-      showToast(t('failed_to_save_draft'), {type: 'error'});
-    }
+  const uploadAudioRecording = async (url: string) => {
+    const data = await recodingUpload.uploadMedia({
+      mediaName: recordingName,
+      mediaUrl: url,
+      mediaType: mediaTypes.CIRCUMSTANCE_RECORDING
+    });
+
+    setRecordingData({
+      mediaType: mediaTypes.CIRCUMSTANCE_RECORDING,
+      mediaKey: data?.key,
+      mediaName: recordingName,
+      mediaLocalUrl: url
+    });
   };
 
   const renderFooter = () => {
     return (
       <View style={styles.footer}>
         <CustomButton
+          disabled={recodingUpload?.loading || imageUploading} // Disabled while uploading recording and image uploading
           textStyle={styles.buttonText}
           style={styles.nextButton}
-          onPress={() => saveDraft(true)}
+          onPress={() => onPressNext()}
+          loading={recodingUpload?.loading || imageUploading}
           title={isEditAndSubmit ? t('save') : t('next')}
         />
-        {!isEditAndSubmit && (
-          <CustomButton
-            textStyle={[styles.timeLocationText, themeStyle.primary]}
-            style={styles.draftButton}
-            onPress={() => saveDraft(false)}
-            title={t('save_draft')}
-          />
-        )}
       </View>
     );
   };
@@ -306,7 +311,7 @@ function MandatoryInformation(props: MandatoryInformationProps): React.JSX.Eleme
           <CustomText fontWeight={fontWeights.MEDIUM} style={styles.timeLocationText}>
             {`${t('time_of_arrest')}:  `}
             <CustomText style={themeStyle.lineColor}>
-              {dateFormat(new Date(), 'hh:MM, dd/mm/yy')}
+              {dateFormat(new Date(), 'dd/mm/yy')}
             </CustomText>
           </CustomText>
         </View>
@@ -333,11 +338,30 @@ function MandatoryInformation(props: MandatoryInformationProps): React.JSX.Eleme
     );
   };
 
+  const renderIdRefusedCheckbox = () => {
+    return (
+      <TouchableOpacity
+        activeOpacity={1}
+        disabled={idProofUrl?.length > 0}
+        onPress={() => setIsIdRefused(!isIdRefused)}
+        style={[styles.idRefusedRow, idProofUrl?.length > 0 && styles.disabled]}
+      >
+        <View style={styles.checkbox}>
+          {isIdRefused ? <Check width={15} height={15} /> : <Uncheck width={15} height={15} />}
+        </View>
+        <CustomText fontWeight={fontWeights.MEDIUM} style={[themeStyle.text, styles.inputTitle]}>
+          {t('refused_to_provide_id')}
+        </CustomText>
+      </TouchableOpacity>
+    );
+  };
+
   const renderForm = () => {
     return (
       <View style={styles.formContainer}>
         {renderTitle(t('id_proof_user_details'))}
         {takePictureButton('id_proof_user_details')}
+        {renderIdRefusedCheckbox()}
         {renderTitle(t('name'), true)}
         <CustomTextInput
           value={name}
@@ -366,48 +390,26 @@ function MandatoryInformation(props: MandatoryInformationProps): React.JSX.Eleme
           onChangeText={setOffenceDetails}
           placeholder={t('enter_criminal_offense')}
         />
-        {renderTitle(t('article_of_criminal_code'), true)}
-        <CriminalCodeSelector
-          selectedList={selectedCriminalCodeList}
-          onSelectItems={setSelectedCriminalCodeList}
-        />
         {renderTitle(t('circumstances'))}
-        <CustomTextInput
-          placeholder={t('enter_circumstances')}
-          multiline
-          containerStyle={styles.circumstances}
-          value={circumstance}
-          onChangeText={setCircumstance}
+        <VoicePlayer
+          loading={recodingUpload?.loading}
+          audioUrl={recordingUrl}
+          style={styles.voicePlayer}
+          onPressClose={onPressClosePLayer}
         />
+        <View style={styles.row}>
+          <CustomTextInput
+            placeholder={t('enter_circumstances')}
+            multiline
+            containerStyle={styles.circumstances}
+            value={circumstance}
+            onChangeText={setCircumstance}
+          />
+          {!recordingUrl && (
+            <VoiceRecorder customStyle={styles.voiceRecorder} onRecordingEnd={onRecordingEnd} />
+          )}
+        </View>
       </View>
-    );
-  };
-
-  const renderPopups = () => {
-    return (
-      <>
-        <CustomPopup
-          title={t('arrest_logged_in')}
-          description={t('you_have_10_hours')}
-          buttonProps={{primaryButtonTitle: t('ok'), primaryButtonAction: resetToHome}}
-          icon={<CircleTick />}
-          visible={showSuccessPopup}
-          setVisible={setShowSuccessPopup}
-        />
-        <CustomPopup
-          title={t('save_your_progress')}
-          description={t('you_havent_completed')}
-          buttonProps={{
-            primaryButtonTitle: t('discard'),
-            secondaryButtonTitle: t('close'),
-            secondaryButtonAction: () => setShowClosePopup(false),
-            primaryButtonAction: onPressCancel
-          }}
-          icon={<CircleWarning />}
-          visible={showClosePopup}
-          setVisible={setShowClosePopup}
-        />
-      </>
     );
   };
 
@@ -415,11 +417,12 @@ function MandatoryInformation(props: MandatoryInformationProps): React.JSX.Eleme
     <View style={[styles.container, themeStyle.background]}>
       <CustomHeader
         showBackButton
-        onClosePress={() => setShowClosePopup(true)}
-        showCloseButton
-        mainTitle={t('mandatory_information')}
+        mainTitle={collectMinimumDetails ? t('arrest_information') : t('mandatory_information')}
+        showLanguageSelector
       />
-      {!isEditAndSubmit && <Progress style={styles.progress} totalStep={4} step={1} />}
+      {!isEditAndSubmit && (
+        <Progress style={styles.progress} totalStep={totalSteps} step={currentStep} />
+      )}
       <KeyboardAwareScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
@@ -428,8 +431,6 @@ function MandatoryInformation(props: MandatoryInformationProps): React.JSX.Eleme
         {renderForm()}
       </KeyboardAwareScrollView>
       {renderFooter()}
-      {renderPopups()}
-      {loading && <CustomLoader />}
     </View>
   );
 }

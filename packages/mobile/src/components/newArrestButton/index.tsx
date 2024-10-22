@@ -36,7 +36,7 @@ const styles = ScaledSheet.create({
     overflow: 'hidden',
     maxHeight: 260,
     height: '220@vs',
-    marginBottom: '12@s'
+    marginBottom: '6@s'
   },
   gradient: {
     width: '100%',

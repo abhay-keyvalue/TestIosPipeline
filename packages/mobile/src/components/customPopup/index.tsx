@@ -15,6 +15,7 @@ type CustomPopupType = {
   icon?: React.ReactNode;
   title: string;
   description?: string;
+  onClose?: () => void;
   buttonProps?: {
     primaryButtonTitle?: string;
     secondaryButtonTitle?: string;
@@ -29,7 +30,8 @@ const CustomPopup = ({
   icon,
   title,
   description,
-  buttonProps
+  buttonProps,
+  onClose
 }: CustomPopupType) => {
   const {colors} = useSelector((state: RootState) => state.theme);
 
@@ -42,27 +44,29 @@ const CustomPopup = ({
     }
   };
 
+  const closePopup = () => {
+    setVisible(false);
+    if (onClose) onClose();
+  };
+
   return (
-    <Modal
-      animationType='slide'
-      transparent={true}
-      visible={visible}
-      onRequestClose={() => setVisible(false)}
-    >
+    <Modal animationType='slide' transparent={true} visible={visible} onRequestClose={closePopup}>
       <View style={styles.container}>
         <View style={[styles.content, themeStyle.cardBackground]}>
           <View style={styles.row}>
             <View>{icon}</View>
-            <TouchableOpacity onPress={() => setVisible(false)}>
+            <TouchableOpacity onPress={closePopup}>
               <Close color={colors.PRIMARY_TEXT} />
             </TouchableOpacity>
           </View>
-          {title?.length > 0 && <CustomText style={styles.title}>{title}</CustomText>}
-          {description?.length > 0 && (
-            <CustomText fontWeight={fontWeights.MEDIUM} style={styles.description}>
-              {description}
-            </CustomText>
-          )}
+          <View style={styles.textContainer}>
+            {title?.length > 0 && <CustomText style={styles.title}>{title}</CustomText>}
+            {description?.length > 0 && (
+              <CustomText fontWeight={fontWeights.MEDIUM} style={styles.description}>
+                {description}
+              </CustomText>
+            )}
+          </View>
           <View style={styles.row}>
             {buttonProps?.secondaryButtonTitle?.length > 0 && (
               <CustomButton
@@ -112,7 +116,6 @@ const styles = ScaledSheet.create({
   },
   description: {
     fontSize: '14@s',
-    marginBottom: '16@s'
   },
   row: {
     flexDirection: 'row',
@@ -134,6 +137,9 @@ const styles = ScaledSheet.create({
   secondaryButtonText: {
     fontSize: '14@s',
     fontWeight: '600'
+  },
+  textContainer :{
+    marginBottom: '16@s'
   }
 });
 

@@ -6,8 +6,7 @@ import {
   Modal,
   View,
   Linking,
-  SafeAreaView,
-  Image
+  SafeAreaView
 } from 'react-native';
 import {useSelector} from 'react-redux';
 import {Camera, useCameraDevice} from 'react-native-vision-camera';
@@ -29,14 +28,19 @@ type CameraProps = {
   type?: string;
   uri?: string;
   uploading?: boolean;
+  disabled?: boolean;
+  renderPreview?: (setVisible: (show: boolean) => void) => JSX.Element;
   onResponse?: (response: string) => void;
 };
 
 const CustomCamera = ({
+  type,
   cameraButton,
   uri = null,
   cameraButtonStyle,
   uploading,
+  disabled = false,
+  renderPreview,
   onResponse
 }: CameraProps) => {
   const {colors} = useSelector((state: RootState) => state.theme);
@@ -112,13 +116,14 @@ const CustomCamera = ({
     if (cameraButton)
       return <TouchableOpacity onPress={openCamera}>{cameraButton}</TouchableOpacity>;
 
+    if (uri?.length > 0 && renderPreview) return renderPreview(setVisible);
+
     return (
       <TouchableOpacity
         onPress={() => openCamera()}
-        disabled={uploading}
+        disabled={uploading || disabled}
         style={[styles.takePictureContainer, themeStyle.background, cameraButtonStyle]}
       >
-        {imageUri?.length > 0 && <Image style={styles.image} source={{uri: imageUri}} />}
         {uploading ? <ActivityIndicator /> : <CameraIcon />}
         {!uploading && (
           <CustomText style={[styles.takePictureText, themeStyle.text]}>
@@ -194,7 +199,7 @@ const CustomCamera = ({
           style={styles.container}
           ref={cropViewRef}
           onImageCrop={onImageCrop}
-          aspectRatio={{width: 16, height: 10}}
+          aspectRatio={type === 'suspect_image' ? {width: 1, height: 1} : {width: 16, height: 10}}
         />
         {renderCropperTools()}
       </>

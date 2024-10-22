@@ -14,7 +14,7 @@ import EditIcon from '@components/editIcon';
 type OffenseDetailsCardType = {
   criminalOffense?: string;
   articleOfCriminalCodes?: Array<{
-    id?: number;
+    id?: string;
     description?: string;
     article?: string;
   }>;

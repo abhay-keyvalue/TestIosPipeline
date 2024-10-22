@@ -76,7 +76,52 @@ const styles = ScaledSheet.create({
     lineHeight: isIOS ? '17@vs' : '22@vs'
   },
   circumstances: {
-    minHeight: '100@vs'
+    minHeight: '100@vs',
+    flex: 1
+  },
+  voicePlayer: {
+    marginTop: '6@vs',
+    marginBottom: '10@vs'
+  },
+  checkbox: {
+    marginRight: '6@ms',
+    marginBottom: '5@vs',
+    marginTop: '14@vs'
+  },
+  idRefusedRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  disabled: {
+    opacity: 0.7
+  },
+  previewContainer: {
+    padding: '10@s',
+    borderRadius: '6@s',
+    overflow: 'hidden',
+    marginTop: '4@vs',
+    flexDirection: 'column',
+    minHeight: '160@vs',
+    justifyContent: 'space-between'
+  },
+  previewImage: {
+    width: '100%',
+    height: '120@vs',
+    borderRadius: '6@s',
+    marginBottom: '10@vs'
+  },
+  documentName: {
+    fontSize: '14@ms0.3',
+    marginBottom: '6@vs',
+    fontWeight: '500'
+  },
+  reTakeButton: {
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  voiceRecorder: {
+    marginLeft: '6@s'
   }
 });
 

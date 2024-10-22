@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {TouchableOpacity, View} from 'react-native';
+import {Linking, TouchableOpacity, View} from 'react-native';
 import {useSelector} from 'react-redux';
 import {useTranslation} from 'react-i18next';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 
 import type {RootState} from '@src/store';
-import {navigateAndReset, navigateTo} from '@navigation/navigationUtils';
+import {navigateAndReset} from '@navigation/navigationUtils';
 import {REFRESH_TOKEN, TOKEN, routes} from '@constants/labels';
 import {showToast} from '@components/customToast';
 import {apiMethods, endPoints} from 'shared';
@@ -21,6 +21,8 @@ import CustomLoader from '@components/customLoader';
 import CourtAppLogo from '@assets/svg/courtAppLogo.svg';
 import ShowPassword from '@assets/svg/showPassword.svg';
 import styles from './style';
+
+const gmailLink = 'https://gmail.app.goo.gl';
 
 function Login(): React.JSX.Element {
   const {colors} = useSelector((state: RootState) => state.theme);
@@ -40,8 +42,8 @@ function Login(): React.JSX.Element {
     }
   };
 
-  const [email, setEmail] = useState('fetestuser@example.com');
-  const [password, setPassword] = useState('fetest1234');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [secureTextEntry, setSecuredTextEntry] = useState(true);
 
   const onSubmit = async () => {
@@ -51,7 +53,7 @@ function Login(): React.JSX.Element {
     const options = {
       method: apiMethods.post,
       endpoint: endPoints.login,
-      data: {email, password, deviceName, pushToken}
+      data: {email: email?.trim(), password, deviceName, pushToken}
     };
 
     const response = await callApi(options);
@@ -73,14 +75,22 @@ function Login(): React.JSX.Element {
     }
   };
 
-  const resetPassword = () => {
-    navigateTo(routes.FORGOT_PASSWORD, {email});
+  const resetPassword = async () => {
+    const options = {
+      method: apiMethods.post,
+      endpoint: endPoints.initiateResetPassword,
+      params: {username: email}
+    };
+    const response = await callApi(options);
+
+    if (response.data) Linking.openURL(gmailLink);
+    else showToast(t('reset_password_failed'), {type: 'error'});
   };
 
   const renderHeader = () => {
     return (
       <View style={styles.header}>
-        <View style={[styles.logoContainer, themeStyle.logoContainer]}>
+        <View style={styles.logoContainer}>
           <CourtAppLogo />
         </View>
         <CustomText style={[styles.appLabel, themeStyle.text]}>{t('courtApp')}</CustomText>

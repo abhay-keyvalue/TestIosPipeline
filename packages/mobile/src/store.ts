@@ -16,7 +16,7 @@ import rootReducer from '@reducers';
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['theme', 'localization', 'home']
+  whitelist: ['theme', 'localization', 'home', 'feature']
 };
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

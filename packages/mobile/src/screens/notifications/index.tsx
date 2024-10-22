@@ -7,8 +7,6 @@ import {useFocusEffect} from '@react-navigation/native';
 
 import {apiMethods, endPoints} from 'shared';
 import type {RootState} from '@src/store';
-import {navigateTo} from '@navigation/navigationUtils';
-import {routes} from '@constants/labels';
 import useApi from '@api/useApi';
 import CustomHeader from '@components/customHeader';
 import NotificationCard from '@components/notificationCard';
@@ -89,7 +87,6 @@ function Notifications(): React.JSX.Element {
 
   const onPressNotification = (notification) => {
     updateReadStatus(notification.id);
-    navigateTo(routes.ARREST_DETAILS, {id: notification.id});
   };
 
   const renderCard = ({item}) => {
@@ -121,11 +118,7 @@ function Notifications(): React.JSX.Element {
 
   const renderEmpty = () => {
     return (
-      <EmptyScreen
-        icon={<EmptyNotifications />}
-        title={t('no_notifications')}
-        description={t('no_notifications_description')}
-      />
+      <EmptyScreen icon={<EmptyNotifications />} description={t('nothing_important_as_of_now')} />
     );
   };
 
@@ -135,8 +128,8 @@ function Notifications(): React.JSX.Element {
   };
 
   return (
-    <View style={[styles.container, themeStyle.cardBackground]}>
-      <CustomHeader title={t('notifications')} />
+    <View style={[styles.container, themeStyle.container]}>
+      <CustomHeader mainTitle={t('notifications')} />
       <View style={styles.content}>{renderNotifications()}</View>
     </View>
   );

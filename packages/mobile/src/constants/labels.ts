@@ -6,7 +6,7 @@ const routes = {
   HOME: 'Home',
   NOTIFICATIONS: 'Notifications',
   PROFILE: 'Profile',
-  FORGOT_PASSWORD: 'ForgotPassword',
+  RESET_PASSWORD: 'ResetPassword',
   MANDATORY_INFORMATION: 'MandatoryInformation',
   ARRESTS: 'Arrests',
   INITIALIZING: 'Initializing',
@@ -15,10 +15,10 @@ const routes = {
   ADDITIONAL_INFO: 'AdditionalInfo',
   REVIEW_ARREST_DETAILS: 'ReviewArrestDetails',
   ARREST_DETAILS: 'ArrestDetails',
+  ARREST_DETAILS_V2: 'ArrestDetailsV2',
   IMAGE_VIEWER: 'ImageViewer',
-  FILTERS: 'Filters'
-
-  
+  FILTERS: 'Filters',
+  SETTINGS_AND_PRIVACY: 'SettingsAndPrivacy'
 };
 
 export {TOKEN, REFRESH_TOKEN, routes};
