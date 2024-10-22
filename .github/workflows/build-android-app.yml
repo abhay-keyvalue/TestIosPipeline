@@ -36,7 +36,7 @@ jobs:
 
       - name: Update version code in build.gradle
         run: |
-              sed -i "s/versionCode [0-9]*/versionCode $((NEW_VERSION_CODE))/" packages/mobile/android/app/build.gradle
+              sed -i "s/versionCode [0-9]*/versionCode ${{ env.NEW_VERSION_CODE }}/" packages/mobile/android/app/build.gradle
       
       - name: Install Java
         uses: actions/setup-java@v3
