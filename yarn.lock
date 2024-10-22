@@ -3246,6 +3246,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-community/slider@npm:^4.5.3":
+  version: 4.5.4
+  resolution: "@react-native-community/slider@npm:4.5.4"
+  checksum: a1e97773974ff24416f95332dc5f0e8befb9650ff309dd4a2f1e28603f493e2a7d158881d5cc50259967b2b36878cfe6ffd2c76670eb2798e9ce7cdf09306cf8
+  languageName: node
+  linkType: hard
+
 "@react-native-firebase/app@npm:^20.4.0":
   version: 20.4.0
   resolution: "@react-native-firebase/app@npm:20.4.0"
@@ -4576,6 +4583,7 @@ __metadata:
     "@babel/preset-env": ^7.20.0
     "@babel/runtime": ^7.20.0
     "@react-native-async-storage/async-storage": ^1.24.0
+    "@react-native-community/slider": ^4.5.3
     "@react-native-firebase/app": ^20.4.0
     "@react-native-firebase/crashlytics": ^20.4.0
     "@react-native-firebase/messaging": ^20.4.0
@@ -4595,17 +4603,21 @@ __metadata:
     babel-plugin-module-resolver: ^5.0.2
     buffer: ^6.0.3
     dateformat: ^5.0.3
+    google-libphonenumber: ^3.2.38
     i18next: ^23.12.1
     jest: ^29.6.3
     metro-react-native-babel-preset: ^0.77.0
     react: 18.2.0
     react-i18next: ^15.0.0
     react-native: 0.74.3
+    react-native-audio-recorder-player: ^3.6.11
     react-native-date-picker: 5.0.4
     react-native-device-info: ^11.1.0
     react-native-dotenv: ^3.4.11
+    react-native-fs: ^2.20.0
     react-native-geocoding: ^0.5.0
     react-native-geolocation-service: ^5.3.1
+    react-native-gifted-charts: ^1.4.43
     react-native-image-crop-tools: ^1.6.4
     react-native-image-picker: ^7.1.2
     react-native-keyboard-aware-scroll-view: ^0.9.5
@@ -5186,7 +5198,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base-64@npm:0.1.0":
+"base-64@npm:0.1.0, base-64@npm:^0.1.0":
   version: 0.1.0
   resolution: "base-64@npm:0.1.0"
   checksum: 5a42938f82372ab5392cbacc85a5a78115cbbd9dbef9f7540fa47d78763a3a8bd7d598475f0d92341f66285afd377509851a9bb5c67bbecb89686e9255d5b3eb
@@ -7575,6 +7587,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gifted-charts-core@npm:0.1.46":
+  version: 0.1.46
+  resolution: "gifted-charts-core@npm:0.1.46"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 1608df7001f0861596f9c18b06333b2950a0d692c4bb71b246e48dae959a9e52fd05a4a4c311df88d8c620ab3f79cf2456ee6e701185785c6e41eb585f2aa4b0
+  languageName: node
+  linkType: hard
+
 "glob-parent@npm:^5.1.2, glob-parent@npm:~5.1.2":
   version: 5.1.2
   resolution: "glob-parent@npm:5.1.2"
@@ -7714,6 +7736,13 @@ __metadata:
     merge2: ^1.4.1
     slash: ^3.0.0
   checksum: b4be8885e0cfa018fc783792942d53926c35c50b3aefd3fdcfb9d22c627639dc26bd2327a40a0b74b074100ce95bb7187bfeae2f236856aa3de183af7a02aea6
+  languageName: node
+  linkType: hard
+
+"google-libphonenumber@npm:^3.2.38":
+  version: 3.2.38
+  resolution: "google-libphonenumber@npm:3.2.38"
+  checksum: 5e30ced0399b3803e61d41c0f7a69e289baf0912568381a0f2f0a5f0e5d3403dd8a26dd758ecb52e56337d83f45865fb36c0d7bfec255868286f05cc03a6b920
   languageName: node
   linkType: hard
 
@@ -7935,6 +7964,15 @@ __metadata:
   bin:
     husky: lib/bin.js
   checksum: 837bc7e4413e58c1f2946d38fb050f5d7324c6f16b0fd66411ffce5703b294bd21429e8ba58711cd331951ee86ed529c5be4f76805959ff668a337dbfa82a1b0
+  languageName: node
+  linkType: hard
+
+"hyochan-welcome@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "hyochan-welcome@npm:1.0.1"
+  bin:
+    hyochan-welcome: bin/hello.js
+  checksum: 2ea7093b54eefcde4c65e4a8ffd3f3926a55ff0bce20a3f5142fe1108e76c0dfcb98517b47714c536f9de8302b92ae02bf240891d3114d527ccd497e2ea9478e
   languageName: node
   linkType: hard
 
@@ -11193,6 +11231,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-audio-recorder-player@npm:^3.6.11":
+  version: 3.6.12
+  resolution: "react-native-audio-recorder-player@npm:3.6.12"
+  dependencies:
+    hyochan-welcome: ^1.0.0
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: a0c74694fe54eacd8f705b38d77d8ee35ddb9e964243ac0a727483d001e7ad24178b5ed3edcb0b4ddccf87d65af3233a823d5dd73fc98099ddbe0602134586e7
+  languageName: node
+  linkType: hard
+
 "react-native-date-picker@npm:5.0.4":
   version: 5.0.4
   resolution: "react-native-date-picker@npm:5.0.4"
@@ -11223,6 +11273,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-fs@npm:^2.20.0":
+  version: 2.20.0
+  resolution: "react-native-fs@npm:2.20.0"
+  dependencies:
+    base-64: ^0.1.0
+    utf8: ^3.0.0
+  peerDependencies:
+    react-native: "*"
+    react-native-windows: "*"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 0be9bb9a5c13b501d0a3006efc3aa5c0b5b211456ee04718297f4e522532f3527f1daa220bd67d3b82d819ed8fdab8f64b7d6e0d7b768c1fd1d8ec9122d94316
+  languageName: node
+  linkType: hard
+
 "react-native-geocoding@npm:^0.5.0":
   version: 0.5.0
   resolution: "react-native-geocoding@npm:0.5.0"
@@ -11234,6 +11300,26 @@ __metadata:
   version: 5.3.1
   resolution: "react-native-geolocation-service@npm:5.3.1"
   checksum: 9a625c9f87811933491055fd8cbd1ef46f97fbbe0262714ad1d9aa969a8900dcb4abc47e58fe162400a81bcdee79324dfcc8e631862df9a22d59ac84af9acfde
+  languageName: node
+  linkType: hard
+
+"react-native-gifted-charts@npm:^1.4.43":
+  version: 1.4.46
+  resolution: "react-native-gifted-charts@npm:1.4.46"
+  dependencies:
+    gifted-charts-core: 0.1.46
+  peerDependencies:
+    expo-linear-gradient: "*"
+    react: "*"
+    react-native: "*"
+    react-native-linear-gradient: "*"
+    react-native-svg: "*"
+  peerDependenciesMeta:
+    expo-linear-gradient:
+      optional: true
+    react-native-linear-gradient:
+      optional: true
+  checksum: a7ec0136f93d4f54c8728d666b625e912e41c4fae9812d9e8d897c0ac67886ea0587574e05e8536d34549a3d3c38b7f1b6c46407c52b9b24b823941b66afdbdb
   languageName: node
   linkType: hard
 
@@ -13390,6 +13476,13 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: fe07c071c4da3645f112c38c0e57beb479a8838616ff4e92598256ecce527f2888c08febc7f9b2f0ce2f0e18540ba3cde41eb2035e4fafcb4f52955037098a81
+  languageName: node
+  linkType: hard
+
+"utf8@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "utf8@npm:3.0.0"
+  checksum: cb89a69ad9ab393e3eae9b25305b3ff08bebca9adc839191a34f90777eb2942f86a96369d2839925fea58f8f722f7e27031d697f10f5f39690f8c5047303e62d
   languageName: node
   linkType: hard
 
