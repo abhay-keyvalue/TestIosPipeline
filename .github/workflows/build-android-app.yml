@@ -30,10 +30,11 @@ jobs:
           echo "from google.oauth2 import service_account" >> fetch_version.py
 
           echo "SCOPES = ['https://www.googleapis.com/auth/androidpublisher']" >> fetch_version.py
-          echo "SERVICE_ACCOUNT_FILE = 'key.json'" >> fetch_version.py
           echo "PACKAGE_NAME = 'org.courtapp.dev'" >> fetch_version.py
 
-          echo "credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)" >> fetch_version.py
+          # Load credentials directly from the environment variable
+          echo "credentials = service_account.Credentials.from_service_account_info(json.loads('''${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY }}'''), scopes=SCOPES)" >> fetch_version.py
+
           echo "service = build('androidpublisher', 'v3', credentials=credentials)" >> fetch_version.py
 
           echo "edit_request = service.edits().insert(body={}, packageName=PACKAGE_NAME)" >> fetch_version.py
@@ -43,9 +44,6 @@ jobs:
           echo "latest_version_code = track_response['releases'][0]['versionCodes'][0]" >> fetch_version.py
 
           echo "print(latest_version_code)" >> fetch_version.py
-
-          # Save the key.json file from the GitHub secret
-          echo "${{ vars.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY }}" > key.json
 
           # Run Python script to fetch the latest version code
           latest_version_code=$(python fetch_version.py)
@@ -58,7 +56,6 @@ jobs:
           # Replace the versionCode in build.gradle
           sed -i "s/versionCode [0-9]*/versionCode $new_version_code/g" packages/mobile/android/app/build.gradle
           echo "Updated build.gradle with versionCode $new_version_code"
-
 
       - name: Install Java
         uses: actions/setup-java@v3
