@@ -32,12 +32,7 @@ jobs:
               echo "${GOOGLE_PLAY_SERVICE_ACCOUNT_KEY}" > key.json  # Save the key to a file
               NEW_VERSION_CODE=$(python fetch_and_update_version.py)  # Get the new version code
               echo "New version code: $NEW_VERSION_CODE"
-              echo "NEW_VERSION_CODE=$NEW_VERSION_CODE" >> $GITHUB_ENV  # Set the environment variable
-
-      - name: Update version code in build.gradle
-        run: |
-              sed -i "s/versionCode [0-9]*/versionCode ${{ env.NEW_VERSION_CODE }}/" packages/mobile/android/app/build.gradle
-      
+              sed -i "s/versionCode [0-9]*/versionCode $NEW_VERSION_CODE/" packages/mobile/android/app/build.gradle
       - name: Install Java
         uses: actions/setup-java@v3
         with:
