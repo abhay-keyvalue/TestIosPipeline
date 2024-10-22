@@ -22,13 +22,19 @@ def fetch_latest_version_code():
 
     return latest_version_code
 
-if __name__ == "__main__":
+def get_new_version_code():
     try:
         latest_version_code = fetch_latest_version_code()
-        print(f"Latest version code from Google Play: {latest_version_code}")
 
         # Increment the version code
         new_version_code = int(latest_version_code) + 1
-        print(f"New version code: {new_version_code}")
+
+        return new_version_code
     except Exception as e:
         print(f"An error occurred: {e}")
+        return None
+
+if __name__ == "__main__":
+    new_version_code = get_new_version_code()
+    if new_version_code:
+        print(new_version_code)
