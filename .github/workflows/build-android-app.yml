@@ -16,6 +16,50 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Google Play Python Client
+        run: |
+          python -m pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
+
+      - name: Fetch Latest Version Code from Google Play
+        id: get-latest-version
+        run: |
+          # Create Python script to fetch versionCode from Google Play
+          echo "import json" > fetch_version.py
+          echo "import google.auth" >> fetch_version.py
+          echo "from googleapiclient.discovery import build" >> fetch_version.py
+          echo "from google.oauth2 import service_account" >> fetch_version.py
+
+          echo "SCOPES = ['https://www.googleapis.com/auth/androidpublisher']" >> fetch_version.py
+          echo "SERVICE_ACCOUNT_FILE = 'key.json'" >> fetch_version.py
+          echo "PACKAGE_NAME = 'org.courtapp.dev'" >> fetch_version.py
+
+          echo "credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)" >> fetch_version.py
+          echo "service = build('androidpublisher', 'v3', credentials=credentials)" >> fetch_version.py
+
+          echo "edit_request = service.edits().insert(body={}, packageName=PACKAGE_NAME)" >> fetch_version.py
+          echo "edit = edit_request.execute()" >> fetch_version.py
+
+          echo "track_response = service.edits().tracks().get(packageName=PACKAGE_NAME, editId=edit['id'], track='internal').execute()" >> fetch_version.py
+          echo "latest_version_code = track_response['releases'][0]['versionCodes'][0]" >> fetch_version.py
+
+          echo "print(latest_version_code)" >> fetch_version.py
+
+          # Save the key.json file from the GitHub secret
+          echo "${{ vars.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY }}" > key.json
+
+          # Run Python script to fetch the latest version code
+          latest_version_code=$(python fetch_version.py)
+          echo "Latest version code from Google Play: $latest_version_code"
+
+          # Increment version code by 1
+          new_version_code=$((int(latest_version_code) + 1))
+          echo "New version code: $new_version_code"
+
+          # Replace the versionCode in build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode $new_version_code/g" packages/mobile/android/app/build.gradle
+          echo "Updated build.gradle with versionCode $new_version_code"
+
+
       - name: Install Java
         uses: actions/setup-java@v3
         with:
