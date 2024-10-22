@@ -32,7 +32,7 @@ jobs:
               echo "${GOOGLE_PLAY_SERVICE_ACCOUNT_KEY}" > key.json  # Save the key to a file
               NEW_VERSION_CODE=$(python fetch_and_update_version.py)  # Get the new version code
               echo "New version code: $NEW_VERSION_CODE"
-              sed -i "s/versionCode [0-9]*/versionCode $NEW_VERSION_CODE/" packages/mobile/android/app/build.gradle
+              sed -i "s/versionCode [0-9]*/versionCode $NEW_VERSION_CODE/g" packages/mobile/android/app/build.gradle
       - name: Install Java
         uses: actions/setup-java@v3
         with:
