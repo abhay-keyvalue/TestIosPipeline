@@ -32,7 +32,7 @@ jobs:
         run: |
           new_ios_version=$(python increment_ios_app_version.py)
           PBXPROJ_FILE="./packages/mobile/ios/CourtApp.xcodeproj/project.pbxproj"
-          sed -i  "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = ${new_ios_version};/" $PBXPROJ_FILE 
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = ${new_ios_version};/" $PBXPROJ_FILE 
           rm .env
 
       - name: Install the Apple certificate and provisioning profile
