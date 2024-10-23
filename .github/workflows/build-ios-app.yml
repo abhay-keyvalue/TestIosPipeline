@@ -15,6 +15,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Create .env file for fetching latest version
+        run: |
+          echo "APP_STORE_CONNECT_API_KEY_ID=${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}" >> .env
+          echo "APP_STORE_CONNECT_ISSUER_ID=${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}" >> .env
+          echo "APP_STORE_CONNECT_API_PRIVATE_KEY=\"${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}\"" >> .env
+          echo "APP_ID=${{ secrets.APP_ID }}" >> .env
+
+      - name: Increment ios version in pbxproj file
+        run: |
+          new_ios_version=$(python increment_ios_app_version.py)
+          PBXPROJ_FILE="./packages/mobile/ios/CourtApp.xcodeproj/project.pbxproj"
+          sed -i  "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = ${new_ios_version};/" $PBXPROJ_FILE 
+          rm .env
+
       - name: Install the Apple certificate and provisioning profile
         env:
           BUILD_CERTIFICATE_BASE64: ${{ vars.BUILD_CERTIFICATE_BASE64 }}
@@ -93,6 +112,7 @@ jobs:
       - name: Install Cocoapod dependencies
         run: |
           yarn pod-install
+
 
       # Cache Build Archive
       - name: Cache Build Archive
