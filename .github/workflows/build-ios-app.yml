@@ -25,14 +25,16 @@ jobs:
           echo "APP_STORE_CONNECT_API_KEY_ID=${{ vars.APPSTORE_API_KEY_ID }}" >> .env
           echo "APP_STORE_CONNECT_ISSUER_ID=${{ vars.APPSTORE_ISSUER_ID }}" >> .env
           echo "APP_STORE_CONNECT_API_PRIVATE_KEY=\"${{ vars.APPSTORE_API_PRIVATE_KEY }}\"" >> .env
-          echo "APP_ID=${{ vars.APP_ID }}" >> .env
+          # echo "APP_ID=${{ vars.APP_ID }}" >> .env
+          echo "APP_ID=6648769517" >> .env
           cat .env
 
       - name: Increment ios version in pbxproj file
         run: |
           new_ios_version=$(python increment_ios_app_version.py)
           PBXPROJ_FILE="./packages/mobile/ios/CourtApp.xcodeproj/project.pbxproj"
-          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = ${new_ios_version};/" $PBXPROJ_FILE 
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = ${new_ios_version};/" $PBXPROJ_FILE
+          cat $PBXPROJ_FILE |  grep CURRENT_PROJECT_VERSION
           rm .env
 
       - name: Install the Apple certificate and provisioning profile
