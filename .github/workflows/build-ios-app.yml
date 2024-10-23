@@ -22,9 +22,9 @@ jobs:
 
       - name: Create .env file for fetching latest version
         run: |
-          echo "APP_STORE_CONNECT_API_KEY_ID=${{ vars.APP_STORE_CONNECT_API_KEY_ID }}" >> .env
-          echo "APP_STORE_CONNECT_ISSUER_ID=${{ vars.APP_STORE_CONNECT_ISSUER_ID }}" >> .env
-          echo "APP_STORE_CONNECT_API_PRIVATE_KEY=\"${{ vars.APP_STORE_CONNECT_API_PRIVATE_KEY }}\"" >> .env
+          echo "APP_STORE_CONNECT_API_KEY_ID=${{ vars.APPSTORE_API_KEY_ID }}" >> .env
+          echo "APP_STORE_CONNECT_ISSUER_ID=${{ vars.APPSTORE_ISSUER_ID }}" >> .env
+          echo "APP_STORE_CONNECT_API_PRIVATE_KEY=\"${{ vars.APPSTORE_API_PRIVATE_KEY }}\"" >> .env
           echo "APP_ID=${{ vars.APP_ID }}" >> .env
           cat .env
 
